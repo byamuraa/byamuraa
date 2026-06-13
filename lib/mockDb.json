@@ -6,7 +6,7 @@
       "category": "Puffer Tote Bags",
       "fabric": "Pink Leopard Print",
       "price": 75,
-      "stock": 8,
+      "stock": 5,
       "images": [
         "/images/products/tote_pink_leopard_1.jpg",
         "/images/products/tote_pink_leopard_2.jpg"
@@ -172,7 +172,7 @@
       "category": "Makeup Pouches",
       "fabric": "Leaf Print",
       "price": 32,
-      "stock": 6,
+      "stock": 4,
       "images": [
         "/images/products/makeup_leaf_1.jpg"
       ],
@@ -241,6 +241,15 @@
         }
       ],
       "createdAt": "2026-06-13T04:00:00.000Z"
+    },
+    {
+      "_id": "user_a1av56apu",
+      "role": "user",
+      "addresses": [],
+      "name": "User1",
+      "email": "user1@gmail.com",
+      "password": "$2b$10$ARIprq1X3XcG/AhVhEL1NObBGc18Z3EGkwuBnTHcSQAEqSM4KHopG",
+      "createdAt": "2026-06-13T05:48:35.823Z"
     }
   ],
   "orders": [
@@ -275,6 +284,104 @@
       "trackingNumber": "",
       "carrier": "",
       "createdAt": "2026-06-13T04:37:26.397Z"
+    },
+    {
+      "_id": "ord_4o5mfww3o",
+      "user": "user_admin",
+      "email": "admin@amuraa.com",
+      "items": [
+        {
+          "product": "prod_10",
+          "name": "Handmade Makeup Pouch",
+          "fabric": "Leaf Print",
+          "image": "/images/products/makeup_leaf_1.jpg",
+          "price": 32,
+          "quantity": 2
+        }
+      ],
+      "shippingAddress": {
+        "name": "Amuraa Admin",
+        "street": "123 Craft Lane",
+        "city": "Jaipur",
+        "state": "Rajasthan",
+        "postalCode": "302001",
+        "country": "India",
+        "phone": "32949518489486"
+      },
+      "totalAmount": 69.12,
+      "paymentMethod": "Mock",
+      "paymentStatus": "Paid",
+      "paymentIntentId": "",
+      "orderStatus": "Processing",
+      "trackingNumber": "",
+      "carrier": "",
+      "createdAt": "2026-06-13T05:46:53.557Z",
+      "updatedAt": "2026-06-13T05:47:01.664Z"
+    },
+    {
+      "_id": "ord_u7rshjnve",
+      "user": null,
+      "email": "subramaniyan1210@gmail.com",
+      "items": [
+        {
+          "product": "prod_1",
+          "name": "Amuraa Puffer Tote Bag",
+          "fabric": "Pink Leopard Print",
+          "image": "/images/products/tote_pink_leopard_1.jpg",
+          "price": 75,
+          "quantity": 2
+        }
+      ],
+      "shippingAddress": {
+        "name": "/jkjkjb",
+        "street": "Subramaniyan",
+        "city": "5794",
+        "state": "33",
+        "postalCode": "606302",
+        "country": "India",
+        "phone": "09750395606"
+      },
+      "totalAmount": 162,
+      "paymentMethod": "Mock",
+      "paymentStatus": "Pending",
+      "paymentIntentId": "",
+      "orderStatus": "Processing",
+      "trackingNumber": "",
+      "carrier": "",
+      "createdAt": "2026-06-13T05:48:01.595Z"
+    },
+    {
+      "_id": "ord_9ytp7lahl",
+      "user": "user_a1av56apu",
+      "email": "subramaniyan1210@gmail.com",
+      "items": [
+        {
+          "product": "prod_1",
+          "name": "Amuraa Puffer Tote Bag",
+          "fabric": "Pink Leopard Print",
+          "image": "/images/products/tote_pink_leopard_1.jpg",
+          "price": 75,
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "name": "User1",
+        "street": "Subramaniyan",
+        "city": "5794",
+        "state": "33",
+        "postalCode": "606302",
+        "country": "India",
+        "phone": "09750395606"
+      },
+      "totalAmount": 81,
+      "paymentMethod": "Mock",
+      "paymentStatus": "Paid",
+      "paymentIntentId": "",
+      "orderStatus": "Processing",
+      "trackingNumber": "",
+      "carrier": "",
+      "createdAt": "2026-06-13T05:49:00.095Z",
+      "updatedAt": "2026-06-13T05:49:11.284Z"
     }
   ],
   "reviews": [
