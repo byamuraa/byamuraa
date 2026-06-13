@@ -39,14 +39,32 @@ function writeMockDb(data: any) {
   }
 }
 
+let mongoStatusCache: { active: boolean; lastChecked: number } | null = null;
+
 // Check if MongoDB URI is valid and MongoDB server is up
 async function isMongoActive(): Promise<boolean> {
   if (!process.env.MONGODB_URI) return false;
+  
+  const now = Date.now();
+  // Return cached status if checked within the last 30 seconds
+  if (mongoStatusCache && (now - mongoStatusCache.lastChecked < 30000)) {
+    return mongoStatusCache.active;
+  }
+  
   try {
-    await dbConnect();
+    // Attempt database connection with a fast timeout race
+    const connectionPromise = dbConnect();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Connection timeout')), 1500)
+    );
+    
+    await Promise.race([connectionPromise, timeoutPromise]);
+    
+    mongoStatusCache = { active: true, lastChecked: now };
     return true;
   } catch (e) {
-    // Fail silently, route queries to local JSON DB
+    // Cache failure status to avoid repeatedly blocking requests
+    mongoStatusCache = { active: false, lastChecked: now };
     return false;
   }
 }
