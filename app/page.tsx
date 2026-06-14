@@ -72,10 +72,10 @@ export default function HomePage() {
     <div className="flex flex-col gap-16 md:gap-24 pb-16">
       
       {/* 1. HERO CAROUSEL SECTION */}
-      <section className="relative bg-brand-pink/40 border-b border-brand-pink/50 overflow-hidden min-h-[500px] flex items-center">
+      <section className="relative bg-brand-pink/40 border-b border-brand-pink/50 overflow-hidden min-h-[600px] py-12 lg:py-20 flex items-center">
         <div className="quilt-bg absolute inset-0 pointer-events-none" />
         
-        <div className="relative mx-auto max-w-7xl w-full px-4 py-16 sm:px-6 lg:px-8 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 z-10">
+        <div className="relative mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 z-10">
           
           {/* Hero text branding */}
           <div className="flex-1 text-center lg:text-left flex flex-col items-center lg:items-start">
@@ -90,20 +90,20 @@ export default function HomePage() {
               </span>
             </h1>
             
-            <p className="mt-6 text-sm sm:text-base text-brand-dark/70 max-w-md leading-relaxed">
+            <p className="mt-6 text-sm sm:text-base text-brand-dark/85 font-medium max-w-md leading-relaxed">
               Limited-run, cloud-soft quilted puffer bags and mini organizer pouches hand-stitched with love from playful patterns. Secure your pre-order today.
             </p>
             
             <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
               <Link
                 href="/shop"
-                className="inline-flex items-center justify-center rounded-full bg-brand-terracotta px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-md hover:bg-brand-terracotta/90 hover:scale-105 active:scale-95 transition-all duration-200"
+                className="btn btn-lg btn-primary"
               >
                 Pre-Order the Drop
               </Link>
               <Link
                 href="/how-it-works"
-                className="inline-flex items-center justify-center rounded-full border border-brand-terracotta/30 bg-white/50 backdrop-blur-xs px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-terracotta hover:bg-white hover:border-brand-terracotta transition-all duration-200"
+                className="btn btn-lg btn-outline bg-white/50 backdrop-blur-xs hover:bg-white"
               >
                 How Drop Ordering Works
               </Link>
@@ -165,12 +165,12 @@ export default function HomePage() {
       </section>
 
       {/* 2. HOW PREPAID ORDERING WORKS INFOGRAPHIC */}
-      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center max-w-xl mx-auto flex flex-col items-center">
           <span className="font-script text-2xl text-brand-terracotta">Handmade & Slow Fashion</span>
-          <h2 className="mt-2 font-serif text-3xl sm:text-4xl font-semibold text-brand-dark">How Drop Pre-Ordering Works</h2>
+          <h2 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark leading-tight">How Drop Pre-Ordering Works</h2>
           <div className="h-0.5 w-16 bg-brand-terracotta/40 mt-4" />
-          <p className="mt-4 text-xs sm:text-sm text-brand-dark/70 leading-relaxed">
+          <p className="mt-4 text-xs sm:text-sm text-brand-dark/85 font-medium leading-relaxed">
             Because each accessory is individually hand-quilted, we release items in limited pre-order batches to prevent fabric waste and maintain premium quality.
           </p>
         </div>
@@ -207,25 +207,25 @@ export default function HomePage() {
               <div className="bg-brand-pink/60 text-brand-terracotta p-3 rounded-xl mb-4">
                 <item.icon className="w-6 h-6 stroke-[1.5]" />
               </div>
-              <h3 className="font-serif text-lg font-semibold text-brand-dark">{item.title}</h3>
-              <p className="mt-2 text-xs text-brand-dark/70 leading-relaxed">{item.desc}</p>
+              <h3 className="font-serif text-lg font-bold text-brand-dark">{item.title}</h3>
+              <p className="mt-2 text-xs text-brand-dark/85 font-medium leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* 3. CURRENT DROP PRODUCT GRID */}
-      <section id="drop" className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+      <section id="drop" className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 border-b border-brand-pink/40 pb-6">
           <div>
             <span className="font-script text-2xl text-brand-terracotta">Current Drop</span>
-            <h2 className="font-serif text-3xl font-semibold text-brand-dark mt-1">Available Quilted Accessories</h2>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark mt-2">Available Quilted Accessories</h2>
           </div>
           <Link
             href="/shop"
-            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-terracotta hover:gap-3 transition-all duration-200"
+            className="btn btn-sm btn-outline"
           >
-            Shop All Items <ArrowRight className="w-4 h-4" />
+            Shop All Items <ArrowRight className="w-4 h-4 ml-1.5" />
           </Link>
         </div>
 
@@ -253,7 +253,7 @@ export default function HomePage() {
       </section>
 
       {/* 4. BRAND STORY SECTION */}
-      <section className="bg-brand-pink/20 border-y border-brand-pink/30 py-16 sm:py-24 relative overflow-hidden">
+      <section className="bg-brand-pink/20 border-y border-brand-pink/30 py-20 sm:py-28 relative overflow-hidden">
         <div className="quilt-bg absolute inset-0 pointer-events-none" />
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row items-center gap-12 sm:gap-16">
           <div className="flex-1 aspect-4/3 relative rounded-3xl overflow-hidden border border-brand-pink shadow-lg w-full max-w-lg">
@@ -266,17 +266,17 @@ export default function HomePage() {
           </div>
           <div className="flex-1 flex flex-col items-start max-w-xl">
             <span className="font-script text-2xl text-brand-terracotta">Amuraa Story</span>
-            <h2 className="mt-2 font-serif text-3xl sm:text-4xl font-semibold text-brand-dark">Handcrafted In Small Batches</h2>
+            <h2 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark">Handcrafted In Small Batches</h2>
             <div className="h-0.5 w-16 bg-brand-terracotta/40 mt-4 mb-6" />
-            <p className="text-sm text-brand-dark/70 leading-relaxed mb-4">
+            <p className="text-sm text-brand-dark/85 font-medium leading-relaxed mb-4">
               Amuraa was founded on a simple belief: accessories should tell a story. In a world of mass production, we slow down. Every puffer tote, makeup pouch, and AirPod bag is individually designed and stitched.
             </p>
-            <p className="text-sm text-brand-dark/70 leading-relaxed mb-6">
+            <p className="text-sm text-brand-dark/85 font-medium leading-relaxed mb-6">
               We select playful fabrics like gingham check, sweet hearts, and retro polka dots on organic cotton. Our process is transparent, zero-waste, and directly supports the local craft community.
             </p>
             <Link
               href="/about"
-              className="inline-flex items-center justify-center rounded-full bg-brand-dark px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white hover:bg-brand-dark/90 transition-all duration-200"
+              className="btn btn-secondary"
             >
               Read Full Story
             </Link>
@@ -285,20 +285,20 @@ export default function HomePage() {
       </section>
 
       {/* 5. TESTIMONIALS SECTION */}
-      <section className="mx-auto max-w-5xl w-full px-4 sm:px-6 lg:px-8 text-center">
+      <section className="mx-auto max-w-5xl w-full px-4 sm:px-6 lg:px-8 py-8 text-center">
         <span className="font-script text-2xl text-brand-terracotta">Testimonials</span>
-        <h2 className="mt-2 font-serif text-3xl font-semibold text-brand-dark">Loved by Our Community</h2>
+        <h2 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark">Loved by Our Community</h2>
         <div className="h-0.5 w-16 bg-brand-terracotta/40 mx-auto mt-4 mb-12" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
           {testimonials.map((t, idx) => (
             <div key={idx} className="bg-white border border-brand-pink/30 p-6 rounded-2xl flex flex-col justify-between shadow-xs">
-              <p className="text-xs sm:text-sm text-brand-dark/80 italic leading-relaxed">
+              <p className="text-xs sm:text-sm text-brand-dark/90 font-medium italic leading-relaxed">
                 "{t.quote}"
               </p>
               <div className="mt-6 pt-4 border-t border-brand-pink/20 flex justify-between items-center text-xs">
                 <span className="font-bold text-brand-dark">{t.author}</span>
-                <span className="text-brand-terracotta font-medium bg-brand-pink/50 px-2 py-0.5 rounded-full text-[10px]">
+                <span className="text-brand-terracotta font-semibold bg-brand-pink/50 px-2 py-0.5 rounded-full text-[10px]">
                   {t.product}
                 </span>
               </div>
@@ -308,11 +308,11 @@ export default function HomePage() {
       </section>
 
       {/* 6. INSTAGRAM-STYLE GALLERY GRID */}
-      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-10">
           <span className="font-script text-2xl text-brand-terracotta">Gallery</span>
-          <h2 className="mt-2 font-serif text-3xl font-semibold text-brand-dark">Worn With Pride</h2>
-          <p className="mt-2 text-xs text-brand-dark/50">Tag us on Instagram to be featured! @amuraa.shop</p>
+          <h2 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark">Worn With Pride</h2>
+          <p className="mt-2 text-xs text-brand-dark/75 font-semibold">Tag us on Instagram to be featured! @amuraa.shop</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">

@@ -86,15 +86,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       {/* Product Information details */}
       <div className="flex flex-1 flex-col p-5 bg-white">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-brand-terracotta/80">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-brand-terracotta">
           {product.category}
         </span>
         
-        <h3 className="mt-1 font-serif text-lg font-medium text-brand-dark line-clamp-1 group-hover:text-brand-terracotta transition-colors duration-200">
+        <h3 className="mt-1 font-serif text-lg font-bold text-brand-dark line-clamp-1 group-hover:text-brand-terracotta transition-colors duration-200">
           {product.name}
         </h3>
         
-        <p className="text-xs text-brand-dark/60 mt-0.5 italic">
+        <p className="text-xs text-brand-dark/85 mt-0.5 font-medium">
           Fabric: {product.fabric}
         </p>
 
@@ -113,9 +113,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             ))}
           </div>
           {product.numReviews > 0 ? (
-            <span className="text-[10px] text-brand-dark/50 font-medium">({product.numReviews})</span>
+            <span className="text-[10px] text-brand-dark/75 font-semibold">({product.numReviews})</span>
           ) : (
-            <span className="text-[10px] text-brand-dark/40 italic">No reviews yet</span>
+            <span className="text-[10px] text-brand-dark/60 italic font-medium">No reviews yet</span>
           )}
         </div>
 
@@ -128,11 +128,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <button
             onClick={handlePreOrder}
             disabled={isSoldOut}
-            className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 focus:outline-none ${
-              isSoldOut
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'bg-brand-pink border border-brand-terracotta/30 text-brand-terracotta hover:bg-brand-terracotta hover:text-white'
-            }`}
+            className={`btn btn-sm ${isSoldOut ? '' : 'btn-outline'}`}
           >
             {isSoldOut ? 'Sold Out' : 'Pre-Order'}
           </button>

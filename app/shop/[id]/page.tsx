@@ -82,7 +82,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 text-center animate-pulse">
-        <p className="font-serif text-lg text-brand-dark/50">Fetching quilted craftsmanship details...</p>
+        <p className="font-serif text-lg text-brand-dark/75">Fetching quilted craftsmanship details...</p>
       </div>
     );
   }
@@ -91,10 +91,10 @@ export default function ProductDetailPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 text-center">
         <h2 className="font-serif text-2xl font-bold text-brand-dark">Craft product not found</h2>
-        <p className="text-xs text-brand-dark/50 mt-1 mb-6">The item you are looking for might have been archived from this drop.</p>
+        <p className="text-xs text-brand-dark/75 mt-1 mb-6">The item you are looking for might have been archived from this drop.</p>
         <button
           onClick={() => router.push('/shop')}
-          className="rounded-full bg-brand-terracotta px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-terracotta/95"
+          className="btn btn-primary"
         >
           Return to Shop
         </button>
@@ -176,7 +176,7 @@ export default function ProductDetailPage() {
       {/* Back to Shop Link */}
       <button
         onClick={() => router.push('/shop')}
-        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-dark/70 hover:text-brand-terracotta mb-8 focus:outline-none"
+        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-dark/85 hover:text-brand-terracotta mb-8 focus:outline-none"
       >
         <ChevronLeft className="w-4 h-4" /> Back to Drops
       </button>
@@ -239,7 +239,7 @@ export default function ProductDetailPage() {
             <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-brand-dark mt-1">
               {product.name}
             </h1>
-            <p className="text-sm font-semibold text-brand-dark/70 mt-1 italic">
+            <p className="text-sm font-semibold text-brand-dark/90 mt-1 italic">
               Fabric Print: {product.fabric}
             </p>
 
@@ -257,7 +257,7 @@ export default function ProductDetailPage() {
                   />
                 ))}
               </div>
-              <span className="text-xs font-bold text-brand-dark/60">
+              <span className="text-xs font-bold text-brand-dark/85">
                 {product.averageRating > 0 ? `${product.averageRating} (${reviews.length} reviews)` : 'No reviews'}
               </span>
             </div>
@@ -278,11 +278,11 @@ export default function ProductDetailPage() {
           {!isSoldOut ? (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-brand-dark/60 uppercase tracking-widest">Qty:</span>
+                <span className="text-xs font-bold text-brand-dark/85 uppercase tracking-widest">Qty:</span>
                 <div className="flex items-center border border-brand-pink/80 bg-white rounded-full">
                   <button
                     onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                    className="p-2 text-brand-dark/60 hover:text-brand-terracotta px-3"
+                    className="p-2 text-brand-dark/85 hover:text-brand-terracotta px-3"
                     aria-label="Decrease quantity"
                   >
                     <Minus className="w-4 h-4" />
@@ -290,25 +290,25 @@ export default function ProductDetailPage() {
                   <span className="font-bold text-sm min-w-[24px] text-center">{quantity}</span>
                   <button
                     onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
-                    className="p-2 text-brand-dark/60 hover:text-brand-terracotta px-3"
+                    className="p-2 text-brand-dark/85 hover:text-brand-terracotta px-3"
                     aria-label="Increase quantity"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <span className="text-[10px] text-brand-dark/50 font-semibold italic">({product.stock} available)</span>
+                <span className="text-[10px] text-brand-dark/75 font-semibold italic">({product.stock} available)</span>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-2">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-white border border-brand-terracotta text-brand-terracotta rounded-full py-3.5 text-xs font-bold uppercase tracking-widest hover:bg-brand-pink/30 active:scale-98 transition-all"
+                  className="btn btn-outline btn-lg flex-1"
                 >
                   Add to Bag
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 bg-brand-terracotta border border-brand-terracotta text-white rounded-full py-3.5 text-xs font-bold uppercase tracking-widest hover:bg-brand-terracotta/90 active:scale-98 transition-all"
+                  className="btn btn-primary btn-lg flex-1"
                 >
                   Buy It Now
                 </button>
@@ -321,7 +321,7 @@ export default function ProductDetailPage() {
           )}
 
           {/* Small Guarantee badges */}
-          <div className="border-t border-brand-pink/30 pt-6 grid grid-cols-3 gap-4 text-center text-[10px] text-brand-dark/60 font-semibold">
+          <div className="border-t border-brand-pink/30 pt-6 grid grid-cols-3 gap-4 text-center text-[10px] text-brand-dark/85 font-semibold">
             <div className="flex flex-col items-center gap-1">
               <ShieldCheck className="w-5 h-5 text-brand-terracotta stroke-[1.5]" />
               <span>100% Hand-Quilted</span>
@@ -345,15 +345,15 @@ export default function ProductDetailPage() {
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center transition-colors focus:outline-none ${
                     activeTab === tab 
-                      ? 'bg-white text-brand-terracotta border-b border-brand-terracotta' 
-                      : 'text-brand-dark/50 hover:text-brand-dark'
+                      ? 'bg-white text-brand-terracotta border-b-2 border-brand-terracotta font-extrabold' 
+                      : 'text-brand-dark/70 hover:text-brand-dark'
                   }`}
                 >
                   {tab}
                 </button>
               ))}
             </div>
-            <div className="p-6 text-xs text-brand-dark/70 leading-relaxed min-h-[100px]">
+            <div className="p-6 text-xs text-brand-dark/90 leading-relaxed min-h-[100px]">
               {activeTab === 'description' && <p>{product.description}</p>}
               {activeTab === 'dimensions' && (
                 <p>{product.dimensions || 'Dimensions not specified. Handcrafted items may vary slightly.'}</p>
@@ -375,14 +375,14 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-7 flex flex-col gap-6">
             <h3 className="font-serif text-2xl font-semibold text-brand-dark mb-2">Customer Reviews</h3>
             {reviews.length === 0 ? (
-              <p className="text-xs text-brand-dark/50 italic py-6">Be the first to review this quilted item!</p>
+              <p className="text-xs text-brand-dark/75 italic py-6">Be the first to review this quilted item!</p>
             ) : (
               <div className="flex flex-col gap-6 divide-y divide-brand-pink/20">
                 {reviews.map((rev) => (
                   <div key={rev._id} className="pt-6 first:pt-0">
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold text-brand-dark">{rev.reviewerName}</span>
-                      <span className="text-[10px] text-brand-dark/40 font-semibold">
+                      <span className="text-[10px] text-brand-dark/65 font-semibold">
                         {new Date(rev.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                       </span>
                     </div>
@@ -391,7 +391,7 @@ export default function ProductDetailPage() {
                         <Star key={i} className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-current' : 'text-slate-200'}`} />
                       ))}
                     </div>
-                    <p className="text-xs text-brand-dark/70 leading-relaxed mt-2 italic bg-brand-pink/10 p-3.5 rounded-xl border border-brand-pink/20">
+                    <p className="text-xs text-brand-dark/90 leading-relaxed mt-2 italic bg-brand-pink/10 p-3.5 rounded-xl border border-brand-pink/20">
                       "{rev.comment}"
                     </p>
                   </div>
@@ -408,7 +408,7 @@ export default function ProductDetailPage() {
               
               {/* Rating Selector */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1.5">Rating</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/85 block mb-1.5">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -426,35 +426,35 @@ export default function ProductDetailPage() {
               {/* Name (for guest users) */}
               {!user && (
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1.5">Your Name</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/85 block mb-1.5">Your Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Sarah M."
                     value={reviewName}
                     onChange={(e) => setReviewName(e.target.value)}
-                    className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-full px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta"
+                    className="w-full bg-brand-cream/60 border border-brand-pink/80 rounded-full px-4 py-2.5 text-xs text-brand-dark placeholder-brand-dark/65 focus:outline-none focus:border-brand-terracotta"
                   />
                 </div>
               )}
 
               {/* Comment text area */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1.5">Review Comment</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/85 block mb-1.5">Review Comment</label>
                 <textarea
                   required
                   rows={4}
                   placeholder="What do you think about the quilt, texture, print fabric, and size?"
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
-                  className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-2xl px-4 py-3 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta resize-none"
+                  className="w-full bg-brand-cream/60 border border-brand-pink/80 rounded-2xl px-4 py-3 text-xs text-brand-dark placeholder-brand-dark/65 focus:outline-none focus:border-brand-terracotta resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submittingReview}
-                className="w-full bg-brand-dark text-white rounded-full py-3 text-xs font-bold uppercase tracking-widest hover:bg-brand-dark/90 transition-all mt-2"
+                className="btn btn-secondary w-full mt-2"
               >
                 {submittingReview ? 'Submitting...' : 'Submit Review'}
               </button>

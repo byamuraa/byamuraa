@@ -175,3 +175,95 @@ body {
   opacity: 0;
   animation: fadeIn 0.6s ease-out forwards;
 }
+
+/* Standardized Button Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem; /* text-[11px] or text-xs equivalent */
+  border-radius: 9999px; /* fully rounded */
+  padding: 0.75rem 1.5rem; /* py-3 px-6 standard */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  background-color: #f1f1f1 !important;
+  color: #a1a1a1 !important;
+  border-color: transparent !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-primary {
+  background-color: #C87A80; /* brand-terracotta */
+  color: #FAF8F5; /* brand-cream */
+  box-shadow: 0 4px 6px -1px rgba(200, 122, 128, 0.15), 0 2px 4px -1px rgba(200, 122, 128, 0.1);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #b3686d;
+  box-shadow: 0 10px 15px -3px rgba(200, 122, 128, 0.25), 0 4px 6px -2px rgba(200, 122, 128, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: #3A3232; /* brand-dark */
+  color: #FAF8F5;
+  box-shadow: 0 4px 6px -1px rgba(58, 50, 50, 0.1);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #2b2525;
+  box-shadow: 0 10px 15px -3px rgba(58, 50, 50, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  border-color: rgba(200, 122, 128, 0.4);
+  color: #C87A80;
+  background-color: transparent;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: #C87A80;
+  color: #FAF8F5;
+  border-color: #C87A80;
+}
+
+.btn-outline-dark {
+  border-color: rgba(58, 50, 50, 0.25);
+  color: #3A3232;
+  background-color: transparent;
+}
+
+.btn-outline-dark:hover:not(:disabled) {
+  background-color: #3A3232;
+  color: #FAF8F5;
+  border-color: #3A3232;
+}
+
+/* Button Sizes */
+.btn-lg {
+  padding: 1rem 2.25rem; /* py-4 px-9 */
+  font-size: 0.75rem; /* text-xs */
+  letter-spacing: 0.12em;
+}
+
+.btn-sm {
+  padding: 0.5rem 1.25rem; /* py-2 px-5 */
+  font-size: 0.65rem; /* text-[10px] */
+}
+

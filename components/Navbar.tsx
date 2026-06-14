@@ -103,7 +103,7 @@ const Navbar: React.FC = () => {
             >
               <ShoppingBag className="h-6 w-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-bold text-white ring-2 ring-brand-cream">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-dark text-[10px] font-bold text-white ring-2 ring-brand-cream">
                   {cartCount}
                 </span>
               )}
@@ -112,7 +112,7 @@ const Navbar: React.FC = () => {
             {/* Pre-Order Now Call to Action (Desktop) */}
             <Link
               href="/shop"
-              className="hidden sm:inline-flex items-center justify-center rounded-full bg-brand-terracotta px-5 py-2 text-xs font-semibold tracking-widest text-white uppercase hover:bg-brand-terracotta/90 hover:scale-105 active:scale-95 transition-all duration-200"
+              className="hidden sm:inline-flex btn btn-primary btn-sm"
             >
               Pre-Order Now
             </Link>
@@ -164,7 +164,7 @@ const Navbar: React.FC = () => {
               <Link
                 href="/shop"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="inline-flex w-full items-center justify-center rounded-full bg-brand-terracotta py-3 text-sm font-semibold tracking-wider text-white uppercase"
+                className="btn btn-primary w-full"
               >
                 Pre-Order Now
               </Link>
@@ -202,14 +202,14 @@ const Navbar: React.FC = () => {
                   {cartItems.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center">
                       <ShoppingBag className="h-16 w-16 text-brand-terracotta/40 stroke-[1.5] mb-4" />
-                      <p className="font-serif text-lg text-brand-dark/80">Your bag is empty!</p>
-                      <p className="text-xs text-brand-dark/60 mt-1 mb-6">Let's find some quilted goodies to fill it.</p>
+                      <p className="font-serif text-lg text-brand-dark/95">Your bag is empty!</p>
+                      <p className="text-xs text-brand-dark/85 mt-1 mb-6">Let's find some quilted goodies to fill it.</p>
                       <button
                         onClick={() => {
                           setIsDrawerOpen(false);
                           window.location.href = '/shop';
                         }}
-                        className="rounded-full bg-brand-terracotta px-6 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-brand-terracotta/90"
+                        className="btn btn-primary"
                       >
                         Explore Drop
                       </button>
@@ -229,7 +229,7 @@ const Navbar: React.FC = () => {
 
                         <div className="flex-1">
                           <h4 className="text-sm font-semibold text-brand-dark line-clamp-1">{item.name}</h4>
-                          <p className="text-xs text-brand-dark/60 mt-0.5">Print: {item.fabric}</p>
+                          <p className="text-xs text-brand-dark/85 mt-0.5">Print: {item.fabric}</p>
                           <p className="text-sm font-semibold text-brand-terracotta mt-1">${item.price}</p>
                           
                           {/* Item Quantity Controller */}
@@ -273,14 +273,14 @@ const Navbar: React.FC = () => {
                       <span>Subtotal</span>
                       <span className="font-semibold text-brand-terracotta">${cartSubtotal}</span>
                     </div>
-                    <p className="text-xs text-brand-dark/60 mb-6">Prepaid orders only. Taxes and shipping calculated at checkout.</p>
+                    <p className="text-xs text-brand-dark/85 mb-6">Prepaid orders only. Taxes and shipping calculated at checkout.</p>
                     
                     <button
                       onClick={() => {
                         setIsDrawerOpen(false);
                         window.location.href = '/cart';
                       }}
-                      className="w-full flex justify-center items-center rounded-full bg-brand-dark py-3.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-dark/90 transition-all duration-200 mb-2.5"
+                      className="btn btn-secondary w-full mb-2.5"
                     >
                       View Cart Details
                     </button>
@@ -289,7 +289,7 @@ const Navbar: React.FC = () => {
                         setIsDrawerOpen(false);
                         window.location.href = '/checkout';
                       }}
-                      className="w-full flex justify-center items-center rounded-full bg-brand-terracotta py-3.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-terracotta/90 transition-all duration-200"
+                      className="btn btn-primary w-full"
                     >
                       Instant checkout
                     </button>
