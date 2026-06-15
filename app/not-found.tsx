@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Home, ShoppingBag } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -17,6 +18,15 @@ export default function NotFound() {
 
         {/* Decorative stitched border card */}
         <div className="relative z-10 flex flex-col items-center text-center">
+
+          <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-brand-pink shadow-sm mb-4">
+            <Image
+              src="/logo.jpg"
+              alt="Amuraa Logo"
+              fill
+              className="object-cover"
+            />
+          </div>
 
           {/* Large 404 number */}
           <span className="font-serif text-[10rem] font-bold leading-none text-brand-terracotta/20 sm:text-[12rem]">
@@ -46,14 +56,14 @@ export default function NotFound() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 rounded-full bg-brand-terracotta px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-xs transition-all hover:bg-brand-terracotta/90"
+              className="btn btn-primary inline-flex items-center gap-2"
             >
               <ShoppingBag className="h-4 w-4" />
               Back to Shop
             </Link>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-full border border-brand-terracotta px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-terracotta transition-all hover:bg-brand-terracotta/5"
+              className="btn btn-outline inline-flex items-center gap-2"
             >
               <Home className="h-4 w-4" />
               Go Home

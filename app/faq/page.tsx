@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronDown, MessageCircle } from 'lucide-react';
 
 /* ─── FAQ Data ─────────────────────────────────────────────── */
@@ -215,7 +216,15 @@ export default function FaqPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 flex flex-col gap-12 sm:gap-16">
       {/* ── Page Header ──────────────────────────────────────── */}
-      <div className="text-center">
+      <div className="text-center flex flex-col items-center">
+        <div className="relative h-14 w-14 overflow-hidden rounded-full border border-brand-terracotta/20 shadow-xs mb-3">
+          <Image
+            src="/logo.jpg"
+            alt="Amuraa Logo"
+            fill
+            className="object-cover"
+          />
+        </div>
         <span className="font-script text-3xl text-brand-terracotta">
           Got Questions?
         </span>

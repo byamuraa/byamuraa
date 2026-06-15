@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ProductCard, { Product } from '@/components/ProductCard';
 import { Search, Filter, X } from 'lucide-react';
 
@@ -79,8 +80,18 @@ export default function ShopPage() {
       
       {/* Page header */}
       <div className="border-b border-brand-pink/40 pb-8 text-center sm:text-left">
-        <span className="font-script text-2xl text-brand-terracotta">Amuraa Collection</span>
-        <h1 className="font-serif text-4xl font-semibold text-brand-dark mt-1">Shop Quilted Drops</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center sm:justify-start">
+          <div className="relative h-10 w-10 overflow-hidden rounded-full border border-brand-terracotta/20 shadow-xs mx-auto sm:mx-0">
+            <Image
+              src="/logo.jpg"
+              alt="Amuraa Logo"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <span className="font-script text-2xl text-brand-terracotta">Amuraa Collection</span>
+        </div>
+        <h1 className="font-serif text-4xl font-semibold text-brand-dark mt-2">Shop Quilted Drops</h1>
         <p className="mt-2 text-xs sm:text-sm text-brand-dark/85">
           Hand-stitched slow-craft accessories. Once a drop sells out, it is gone!
         </p>

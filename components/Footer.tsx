@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useToast } from '@/context/ToastContext';
 
 const Footer: React.FC = () => {
@@ -46,7 +47,17 @@ const Footer: React.FC = () => {
           
           {/* Brand Tagline Widget */}
           <div className="col-span-1 md:col-span-1 flex flex-col gap-4">
-            <h3 className="font-serif text-2xl font-semibold text-white">Amuraa</h3>
+            <div className="flex items-center gap-3">
+              <div className="relative h-10 w-10 overflow-hidden rounded-full border border-brand-pink/20 shadow-xs">
+                <Image
+                  src="/logo.jpg"
+                  alt="Amuraa Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <h3 className="font-serif text-2xl font-semibold text-white">Amuraa</h3>
+            </div>
             <p className="font-script text-lg text-brand-pink italic leading-tight">
               "Crafted with Soul, Worn with Pride"
             </p>

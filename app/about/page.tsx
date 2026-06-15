@@ -20,6 +20,14 @@ export default function AboutPage() {
       
       {/* Hero Brand Header */}
       <div className="text-center max-w-2xl mx-auto flex flex-col items-center">
+        <div className="relative h-14 w-14 overflow-hidden rounded-full border border-brand-terracotta/20 shadow-xs mb-3">
+          <Image
+            src="/logo.jpg"
+            alt="Amuraa Logo"
+            fill
+            className="object-cover"
+          />
+        </div>
         <span className="font-script text-3xl text-brand-terracotta">Our Story</span>
         <h1 className="font-serif text-4xl sm:text-5xl font-semibold text-brand-dark mt-2 leading-tight">
           Handmade, Slow-Crafted, Built with Soul
@@ -115,7 +123,7 @@ export default function AboutPage() {
       <section className="text-center bg-brand-pink/35 border border-brand-pink/60 rounded-3xl p-8 max-w-xl mx-auto">
         <h3 className="font-serif text-xl font-semibold text-brand-dark">Claim Your Piece Today</h3>
         <p className="text-xs text-brand-dark/60 mt-1 mb-6">Explore the current Drop list and support slow craft.</p>
-        <Link href="/shop" className="rounded-full bg-brand-terracotta px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-xs hover:bg-brand-terracotta/90 transition-all">
+        <Link href="/shop" className="btn btn-primary">
           Shop Current Drop
         </Link>
       </section>

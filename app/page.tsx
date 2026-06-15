@@ -79,9 +79,19 @@ export default function HomePage() {
           
           {/* Hero text branding */}
           <div className="flex-1 text-center lg:text-left flex flex-col items-center lg:items-start">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-terracotta/10 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-brand-terracotta">
-              <Sparkles className="w-3.5 h-3.5" /> Handmade Drop Is Live
-            </span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-brand-terracotta/30 shadow-xs">
+                <Image
+                  src="/logo.jpg"
+                  alt="Amuraa Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-terracotta/10 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-brand-terracotta">
+                <Sparkles className="w-3.5 h-3.5" /> Handmade Drop Is Live
+              </span>
+            </div>
             
             <h1 className="mt-6 font-serif text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-brand-dark leading-[1.1]">
               Crafted with Soul, <br />
@@ -265,7 +275,17 @@ export default function HomePage() {
             />
           </div>
           <div className="flex-1 flex flex-col items-start max-w-xl">
-            <span className="font-script text-2xl text-brand-terracotta">Amuraa Story</span>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="relative h-10 w-10 overflow-hidden rounded-full border border-brand-terracotta/20 shadow-xs">
+                <Image
+                  src="/logo.jpg"
+                  alt="Amuraa Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <span className="font-script text-2xl text-brand-terracotta">Amuraa Story</span>
+            </div>
             <h2 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark">Handcrafted In Small Batches</h2>
             <div className="h-0.5 w-16 bg-brand-terracotta/40 mt-4 mb-6" />
             <p className="text-sm text-brand-dark/85 font-medium leading-relaxed mb-4">

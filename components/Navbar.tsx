@@ -26,13 +26,23 @@ const Navbar: React.FC = () => {
           
           {/* Logo Section */}
           <div className="flex flex-1 items-center justify-start lg:w-0">
-            <Link href="/" className="flex items-center gap-1 group">
-              <span className="font-serif text-3xl font-semibold tracking-wide text-brand-dark group-hover:text-brand-terracotta transition-colors duration-200">
-                Amuraa
-              </span>
-              <span className="font-script text-xl text-brand-terracotta translate-y-1 block leading-none">
-                drops
-              </span>
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative h-9 w-9 overflow-hidden rounded-full border border-brand-pink shadow-xs">
+                <Image
+                  src="/logo.jpg"
+                  alt="Amuraa Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-serif text-3xl font-semibold tracking-wide text-brand-dark group-hover:text-brand-terracotta transition-colors duration-200">
+                  Amuraa
+                </span>
+                <span className="font-script text-xl text-brand-terracotta translate-y-0.5 block leading-none">
+                  drops
+                </span>
+              </div>
             </Link>
           </div>
 
