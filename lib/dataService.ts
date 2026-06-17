@@ -42,7 +42,7 @@ function writeMockDb(data: any) {
 let mongoStatusCache: { active: boolean; lastChecked: number } | null = null;
 
 // Check if MongoDB URI is valid and MongoDB server is up
-async function isMongoActive(): Promise<boolean> {
+export async function isMongoActive(): Promise<boolean> {
   if (!process.env.MONGODB_URI) return false;
   
   const now = Date.now();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import Product from '@/lib/models/Product';
 import { getAuthUser } from '@/lib/auth';
+import { isMongoActive, getProductById, updateProduct, deleteProduct } from '@/lib/dataService';
 
 // Helper to check authentication
 function checkAuth(req: NextRequest) {
@@ -16,9 +17,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    const isMongo = await isMongoActive();
+    if (isMongo) {
+      await dbConnect();
+    }
     const { id } = await params;
-    const product = await Product.findById(id);
+    
+    let product;
+    if (isMongo) {
+      product = await Product.findById(id);
+    } else {
+      product = await getProductById(id);
+    }
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -38,11 +48,20 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    const isMongo = await isMongoActive();
+    if (isMongo) {
+      await dbConnect();
+    }
     const { id } = await params;
     const body = await req.json();
 
-    const existingProduct = await Product.findById(id);
+    let existingProduct;
+    if (isMongo) {
+      existingProduct = await Product.findById(id);
+    } else {
+      existingProduct = await getProductById(id);
+    }
+
     if (!existingProduct) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
@@ -55,10 +74,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
 
-      // Check slug uniqueness
-      const existingSlug = await Product.findOne({ slug: newSlug, _id: { $ne: id } });
-      if (existingSlug) {
-        newSlug = `${newSlug}-${Math.random().toString(36).substring(2, 6)}`;
+      if (isMongo) {
+        // Check slug uniqueness
+        const existingSlug = await Product.findOne({ slug: newSlug, _id: { $ne: id } });
+        if (existingSlug) {
+          newSlug = `${newSlug}-${Math.random().toString(36).substring(2, 6)}`;
+        }
       }
       body.slug = newSlug;
     }
@@ -68,11 +89,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (body.compareAtPrice !== undefined) body.compareAtPrice = Number(body.compareAtPrice);
     if (body.stock !== undefined) body.stock = Number(body.stock);
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { $set: body },
-      { new: true, runValidators: true }
-    );
+    let updatedProduct;
+    if (isMongo) {
+      updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        { $set: body },
+        { new: true, runValidators: true }
+      );
+    } else {
+      updatedProduct = await updateProduct(id, body);
+    }
 
     return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error: any) {
@@ -88,9 +114,18 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    const isMongo = await isMongoActive();
+    if (isMongo) {
+      await dbConnect();
+    }
     const { id } = await params;
-    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    let deletedProduct;
+    if (isMongo) {
+      deletedProduct = await Product.findByIdAndDelete(id);
+    } else {
+      deletedProduct = await deleteProduct(id);
+    }
 
     if (!deletedProduct) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });

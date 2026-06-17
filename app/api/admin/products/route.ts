@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import Product from '@/lib/models/Product';
 import { getAuthUser } from '@/lib/auth';
+import { isMongoActive, getProducts, createProduct } from '@/lib/dataService';
 
 // 1. GET - Fetch products list with filters & pagination
 export async function GET(req: NextRequest) {
@@ -12,7 +13,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    const isMongo = await isMongoActive();
+    if (isMongo) {
+      await dbConnect();
+    }
 
     const searchParams = req.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -46,11 +50,20 @@ export async function GET(req: NextRequest) {
     else if (sort === 'stock_desc') sortObj = { stock: -1 };
     else if (sort === 'newest') sortObj = { createdAt: -1 };
 
-    const total = await Product.countDocuments(query);
-    const products = await Product.find(query)
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limit);
+    let total = 0;
+    let products = [];
+
+    if (isMongo) {
+      total = await Product.countDocuments(query);
+      products = await Product.find(query)
+        .sort(sortObj)
+        .skip(skip)
+        .limit(limit);
+    } else {
+      const allProducts = await getProducts({ category, search, sort, status: 'all' });
+      total = allProducts.length;
+      products = allProducts.slice(skip, skip + limit);
+    }
 
     return NextResponse.json({
       success: true,
@@ -80,7 +93,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    const isMongo = await isMongoActive();
+    if (isMongo) {
+      await dbConnect();
+    }
 
     const body = await req.json();
     const {
@@ -119,13 +135,15 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
 
-    // Check slug uniqueness and append random string if duplicate
-    const existingSlug = await Product.findOne({ slug: generatedSlug });
-    if (existingSlug) {
-      generatedSlug = `${generatedSlug}-${Math.random().toString(36).substring(2, 6)}`;
+    if (isMongo) {
+      // Check slug uniqueness and append random string if duplicate
+      const existingSlug = await Product.findOne({ slug: generatedSlug });
+      if (existingSlug) {
+        generatedSlug = `${generatedSlug}-${Math.random().toString(36).substring(2, 6)}`;
+      }
     }
 
-    const newProduct = await Product.create({
+    const payload = {
       name,
       slug: generatedSlug,
       category,
@@ -145,7 +163,9 @@ export async function POST(req: NextRequest) {
       strapType: strapType || '',
       variants: variants || [],
       seo: seo || { metaTitle: name, metaDesc: description.substring(0, 150) },
-    });
+    };
+
+    const newProduct = await createProduct(payload);
 
     return NextResponse.json({
       success: true,

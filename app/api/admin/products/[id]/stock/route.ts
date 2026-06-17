@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import Product from '@/lib/models/Product';
 import { getAuthUser } from '@/lib/auth';
+import { isMongoActive, getProductById, updateProduct } from '@/lib/dataService';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,7 +11,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    const isMongo = await isMongoActive();
+    if (isMongo) {
+      await dbConnect();
+    }
     const { id } = await params;
     const { stock } = await req.json();
 
@@ -23,24 +27,36 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     // Determine status automatically if stock becomes 0
     const updateObj: any = { stock: Number(stock) };
+    
+    let existingProduct;
+    if (isMongo) {
+      existingProduct = await Product.findById(id);
+    } else {
+      existingProduct = await getProductById(id);
+    }
+
+    if (!existingProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
     if (Number(stock) === 0) {
       updateObj.status = 'soldout';
     } else {
       // If was soldout, default back to active (unless it was draft)
-      const existingProduct = await Product.findById(id);
-      if (existingProduct && existingProduct.status === 'soldout') {
+      if (existingProduct.status === 'soldout') {
         updateObj.status = 'active';
       }
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { $set: updateObj },
-      { new: true }
-    );
-
-    if (!updatedProduct) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    let updatedProduct;
+    if (isMongo) {
+      updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        { $set: updateObj },
+        { new: true }
+      );
+    } else {
+      updatedProduct = await updateProduct(id, updateObj);
     }
 
     return NextResponse.json({
