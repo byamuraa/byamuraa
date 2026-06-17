@@ -72,12 +72,22 @@ async function isMongoActive(): Promise<boolean> {
 // -------------------------------------------------------------
 // PRODUCT OPERATIONS
 // -------------------------------------------------------------
+// Helper to normalize product images for storefront compatibility
+const normalizeProduct = (p: any) => {
+  if (!p) return null;
+  return {
+    ...p,
+    images: p.images ? p.images.map((img: any) => typeof img === 'string' ? img : img.url) : []
+  };
+};
+
 export async function getProducts(filters: {
   category?: string;
   fabric?: string;
   isFeatured?: boolean;
   search?: string;
   sort?: string;
+  status?: string;
 } = {}) {
   const isMongo = await isMongoActive();
 
@@ -90,6 +100,13 @@ export async function getProducts(filters: {
       if (filters.search) {
         query.name = { $regex: filters.search, $options: 'i' };
       }
+      
+      // Filter out drafts by default for storefront calls
+      if (filters.status && filters.status !== 'all') {
+        query.status = filters.status;
+      } else if (!filters.status) {
+        query.status = 'active';
+      }
 
       let queryBuilder = Product.find(query);
       if (filters.sort) {
@@ -99,7 +116,8 @@ export async function getProducts(filters: {
         else if (filters.sort === 'popularity') queryBuilder = queryBuilder.sort({ averageRating: -1 });
       }
 
-      return await queryBuilder.lean();
+      const list = await queryBuilder.lean();
+      return list.map(normalizeProduct);
     } catch (error) {
       console.error('Mongoose product fetch failed, falling back to mock:', error);
     }
@@ -122,6 +140,13 @@ export async function getProducts(filters: {
     const s = filters.search.toLowerCase();
     list = list.filter((p: any) => p.name.toLowerCase().includes(s) || p.description.toLowerCase().includes(s));
   }
+  
+  // Status filter for Mock DB
+  if (filters.status && filters.status !== 'all') {
+    list = list.filter((p: any) => p.status === filters.status);
+  } else if (!filters.status) {
+    list = list.filter((p: any) => p.status === undefined || p.status === 'active');
+  }
 
   if (filters.sort) {
     if (filters.sort === 'price_asc') list.sort((a, b) => a.price - b.price);
@@ -130,7 +155,7 @@ export async function getProducts(filters: {
     else if (filters.sort === 'popularity') list.sort((a, b) => b.averageRating - a.averageRating);
   }
 
-  return list;
+  return list.map(normalizeProduct);
 }
 
 export async function getProductById(id: string) {
@@ -138,14 +163,16 @@ export async function getProductById(id: string) {
 
   if (isMongo) {
     try {
-      return await Product.findById(id).lean();
+      const prod = await Product.findById(id).lean();
+      return normalizeProduct(prod);
     } catch (e) {
       // If invalid ObjectId is passed, fallback
     }
   }
 
   const db = readMockDb();
-  return db.products.find((p: any) => p._id === id) || null;
+  const prod = db.products.find((p: any) => p._id === id) || null;
+  return normalizeProduct(prod);
 }
 
 export async function createProduct(data: any) {

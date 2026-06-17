@@ -6,7 +6,7 @@
       "category": "Puffer Tote Bags",
       "fabric": "Pink Leopard Print",
       "price": 75,
-      "stock": 5,
+      "stock": 3,
       "images": [
         "/images/products/tote_pink_leopard_1.jpg",
         "/images/products/tote_pink_leopard_2.jpg"
@@ -382,6 +382,72 @@
       "carrier": "",
       "createdAt": "2026-06-13T05:49:00.095Z",
       "updatedAt": "2026-06-13T05:49:11.284Z"
+    },
+    {
+      "_id": "ord_pibl6kbml",
+      "user": "user_a1av56apu",
+      "email": "user1@gmail.com",
+      "items": [
+        {
+          "product": "prod_1",
+          "name": "Amuraa Puffer Tote Bag",
+          "fabric": "Pink Leopard Print",
+          "image": "/images/products/tote_pink_leopard_1.jpg",
+          "price": 75,
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "name": "User1",
+        "street": "gfvedfvc",
+        "city": "wfev",
+        "state": "svdcd",
+        "postalCode": "fscfr",
+        "country": "India",
+        "phone": "969651213"
+      },
+      "totalAmount": 81,
+      "paymentMethod": "Mock",
+      "paymentStatus": "Paid",
+      "paymentIntentId": "",
+      "orderStatus": "Processing",
+      "trackingNumber": "",
+      "carrier": "",
+      "createdAt": "2026-06-15T07:49:24.129Z",
+      "updatedAt": "2026-06-15T07:49:30.597Z"
+    },
+    {
+      "_id": "ord_5lpphmmfw",
+      "user": "user_a1av56apu",
+      "email": "user1@gmail.com",
+      "items": [
+        {
+          "product": "prod_1",
+          "name": "Amuraa Puffer Tote Bag",
+          "fabric": "Pink Leopard Print",
+          "image": "/images/products/tote_pink_leopard_1.jpg",
+          "price": 75,
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "name": "User1",
+        "street": "jdsjbjkdsncw;",
+        "city": "jjdjkf",
+        "state": "kjkdkvj",
+        "postalCode": "8555",
+        "country": "India",
+        "phone": "8568525425"
+      },
+      "totalAmount": 81,
+      "paymentMethod": "Mock",
+      "paymentStatus": "Paid",
+      "paymentIntentId": "",
+      "orderStatus": "Processing",
+      "trackingNumber": "",
+      "carrier": "",
+      "createdAt": "2026-06-15T07:54:03.905Z",
+      "updatedAt": "2026-06-15T07:54:09.864Z"
     }
   ],
   "reviews": [
