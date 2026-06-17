@@ -25,8 +25,8 @@ import {
 import Image from 'next/image';
 
 // Dynamically import ReactQuill to prevent SSR window reference crashes
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+import 'react-quill-new/dist/quill.snow.css';
 
 // Schema validation
 const productSchema = z.object({
