@@ -9,6 +9,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ user: null });
     }
 
+    if (authPayload.userId === 'admin') {
+      return NextResponse.json({
+        user: {
+          id: 'admin',
+          name: 'Amuraa Admin',
+          email: authPayload.email,
+          role: 'admin',
+          addresses: [],
+        },
+      });
+    }
+
     const user = await getUserById(authPayload.userId);
     if (!user) {
       return NextResponse.json({ user: null });

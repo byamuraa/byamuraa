@@ -302,12 +302,22 @@ export default function AccountPage() {
           <p className="text-xs text-brand-dark/50 mt-1">{user.email}</p>
         </div>
         
-        <button
-          onClick={logout}
-          className="inline-flex items-center gap-1.5 rounded-full border border-brand-terracotta/20 bg-white hover:bg-brand-pink/30 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-terracotta transition-colors"
-        >
-          <LogOut className="w-4 h-4" /> Sign Out
-        </button>
+        <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+          {user.role === 'admin' && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta/90 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-colors"
+            >
+              Admin Dashboard
+            </Link>
+          )}
+          <button
+            onClick={logout}
+            className="inline-flex items-center gap-1.5 rounded-full border border-brand-terracotta/20 bg-white hover:bg-brand-pink/30 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-terracotta transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
