@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import ProductCard, { Product } from '@/components/ProductCard';
-import { ArrowRight, Sparkles, Heart, RefreshCw, Scissors, Truck } from 'lucide-react';
+import { Product } from '@/components/ProductCard';
+import { Sparkles, Heart, RefreshCw, Scissors, Truck } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 
 const testimonials = [
@@ -224,43 +224,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. CURRENT DROP PRODUCT GRID */}
-      <section id="drop" className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 border-b border-brand-pink/40 pb-6">
-          <div>
-            <span className="font-script text-2xl text-brand-terracotta">Current Drop</span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-dark mt-2">Available Quilted Accessories</h2>
-          </div>
-          <Link
-            href="/shop"
-            className="btn btn-sm btn-outline"
-          >
-            Shop All Items <ArrowRight className="w-4 h-4 ml-1.5" />
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="aspect-square bg-white rounded-2xl border border-brand-pink/40 p-5 animate-pulse flex flex-col justify-end gap-3 h-[320px]">
-                <div className="h-4 w-1/3 bg-slate-200 rounded" />
-                <div className="h-6 w-3/4 bg-slate-200 rounded" />
-                <div className="h-4 w-1/2 bg-slate-200 rounded" />
-              </div>
-            ))}
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="font-serif text-lg text-brand-dark/60">No items available in this drop.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.slice(0, 8).map((prod) => (
-              <ProductCard key={prod._id} product={prod} />
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* 4. BRAND STORY SECTION */}
       <section className="bg-brand-pink/20 border-y border-brand-pink/30 py-20 sm:py-28 relative overflow-hidden">
