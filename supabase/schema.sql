@@ -195,3 +195,33 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+
+-- -------------------------------------------------------------
+-- STORAGE BUCKET POLICIES (product-images bucket)
+-- -------------------------------------------------------------
+
+-- 1. Allow public select access to view product images
+create policy "Allow public select access to product-images" on storage.objects
+  for select using (bucket_id = 'product-images');
+
+-- 2. Allow admin authenticated users to upload (INSERT) images
+create policy "Allow admin upload to product-images" on storage.objects
+  for insert to authenticated with check (
+    bucket_id = 'product-images' and
+    exists (
+      select 1 from public.profiles 
+      where profiles.id = auth.uid() and profiles.is_admin = true
+    )
+  );
+
+-- 3. Allow admin authenticated users to delete (DELETE) images
+create policy "Allow admin delete from product-images" on storage.objects
+  for delete to authenticated using (
+    bucket_id = 'product-images' and
+    exists (
+      select 1 from public.profiles 
+      where profiles.id = auth.uid() and profiles.is_admin = true
+    )
+  );
+
