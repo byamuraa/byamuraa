@@ -24,6 +24,7 @@ create table if not exists public.products (
   status text default 'draft', -- 'active' | 'draft' | 'soldout'
   is_new_drop boolean default false,
   is_bestseller boolean default false,
+  images text[] default '{}'::text[],
   description text not null,
   dimensions text default '',
   care_instructions text default '',
