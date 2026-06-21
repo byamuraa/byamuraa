@@ -69,3 +69,32 @@ To enable OAuth login:
   - **Read access (SELECT)**: Everyone (public).
   - **Write access (INSERT, UPDATE, DELETE)**: Authenticated admin users (`byamuraa@gmail.com`).
 
+## Email/Password Auth — Testing Checklist
+
+To verify that the email/password authentication system is fully operational:
+
+### 1. Traditional Sign Up
+- Go to `/account` and click **"Don't have an account? Sign Up"**.
+- Enter details:
+  - **Full Name**: `John Doe`
+  - **Email**: `john.doe@example.com`
+  - **Password**: `Test12345` (must be at least 8 characters and contain at least one number).
+- Click **Create Account**. Verify that the view switches to the check-email screen.
+- Verify that a row is automatically created in the `profiles` table in Supabase via the Postgres trigger.
+
+### 2. Traditional Sign In
+- Go to `/account` (or `/admin/login`).
+- Enter the registered email and password.
+- Click **Sign In**.
+- Verify:
+  - Customer (`john.doe@example.com`) redirects to `/` (storefront).
+  - Admin (`byamuraa@gmail.com`) redirects to `/admin` (dashboard).
+
+### 3. Forgot & Reset Password
+- Go to `/account` and click **Forgot password?**.
+- Enter your email and click **Send Reset Link**.
+- Open the reset email and click the link (directs to `/auth/reset-password`).
+- Type a new password and click **Reset Password**.
+- Verify that you are redirected to the login screen and can log in with the new password.
+
+

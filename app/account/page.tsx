@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth, Address } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { GoogleSignInButton } from '@/components/GoogleSignInButton';
+import { AuthForm } from '@/components/AuthForm';
 import { ShoppingBag, MapPin, LogOut, Lock, User as UserIcon, Plus, CheckCircle, Package, Truck, Home } from 'lucide-react';
 
 export default function AccountPage() {
@@ -124,29 +124,10 @@ export default function AccountPage() {
   // -------------------------------------------------------------
   if (!user) {
     return (
-      <div className="mx-auto max-w-md px-4 py-20 flex flex-col items-center">
-        <div className="text-center mb-8 flex flex-col items-center">
-          <span className="font-script text-2xl text-brand-terracotta">Amuraa Drops</span>
-          <h2 className="font-serif text-3xl font-bold text-brand-dark mt-2">Sign In to Your Account</h2>
-          <p className="text-xs text-brand-dark/60 mt-2 max-w-xs text-center">
-            Log in to view early drop passwords, track your handmade orders, and manage shipping addresses.
-          </p>
-        </div>
-
-        <div className="w-full bg-white border border-brand-pink/40 rounded-3xl p-8 shadow-xs flex flex-col gap-4">
-          <GoogleSignInButton
-            onClick={async () => {
-              setAuthLoading(true);
-              try {
-                await loginWithGoogle();
-              } catch (e) {
-                showToast('Authentication failed.', 'error');
-                setAuthLoading(false);
-              }
-            }}
-            loading={authLoading}
-            text="Continue with Google"
-          />
+      <div className="min-h-[80vh] flex items-center justify-center bg-brand-cream/30 py-12 px-4 sm:px-6 lg:px-8 relative">
+        <div className="quilt-bg absolute inset-0 pointer-events-none opacity-30" />
+        <div className="relative z-10 w-full flex justify-center">
+          <AuthForm />
         </div>
       </div>
     );

@@ -116,17 +116,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Deprecated legacy helpers - keeping signature to prevent page compile errors
   const login = async (email: string, password: string) => {
-    return { success: false, error: 'Legacy login is disabled. Please continue with Google.' };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+
+      if (data.user) {
+        await fetchUserProfile(data.user.id, data.user.email || '', data.user.user_metadata);
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('Login error:', err);
+      return { success: false, error: err.message || 'Invalid email or password' };
+    }
   };
 
   const registerFull = async (name: string, email: string, password: string) => {
-    return { success: false, error: 'Legacy registration is disabled. Please continue with Google.' };
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+
+      if (data.user) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await fetchUserProfile(session.user.id, session.user.email || '', session.user.user_metadata);
+        }
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      return { success: false, error: err.message || 'Registration failed' };
+    }
   };
 
   const register = async (name: string, email: string) => {
-    return { success: false, error: 'Legacy registration is disabled. Please continue with Google.' };
+    return { success: false, error: 'Standard registration requires a password. Please use registerFull.' };
   };
 
   const logout = async () => {
