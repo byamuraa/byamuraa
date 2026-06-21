@@ -52,17 +52,9 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 2. Secure Customer Account directory
-  if (pathname.startsWith('/account')) {
-    if (!user) {
-      // Redirect unauthenticated users to the homepage
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-  }
-
   return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*'],
+  matcher: ['/admin/:path*'],
 };
