@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReviews, createReview } from '@/lib/dataService';
-import { getAuthUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,14 +45,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const authUser = getAuthUser(req);
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
     
     const finalReviewerName = authUser 
-      ? (authUser.email.split('@')[0]) // Fallback display name
+      ? (authUser.email ? authUser.email.split('@')[0] : 'Customer')
       : (reviewerName || 'Anonymous Guest');
 
     const newReview = await createReview({
-      user: authUser ? authUser.userId : null,
+      user: authUser ? authUser.id : null,
       reviewerName: finalReviewerName,
       product: productId,
       rating: numericRating,

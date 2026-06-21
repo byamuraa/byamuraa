@@ -11,7 +11,7 @@ import Image from 'next/image';
 const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { cartItems, cartCount, cartSubtotal, updateQuantity, removeFromCart } = useCart();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -88,22 +88,68 @@ const Navbar: React.FC = () => {
             >
               Contact
             </Link>
+            {user?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="text-sm font-bold tracking-wide uppercase transition-colors duration-200 text-brand-terracotta hover:underline underline-offset-8 decoration-2"
+              >
+                Admin Panel
+              </Link>
+            )}
           </nav>
 
           {/* Header Action Controls */}
           <div className="flex flex-1 items-center justify-end gap-4 sm:gap-6">
             
             {/* Account Profile Access */}
-            <Link
-              href={user ? '/account' : '/account'} // Always maps to account page (login/dashboard)
-              className="text-brand-dark hover:text-brand-terracotta transition-colors duration-200 relative p-1"
-              aria-label="Account"
-            >
-              <User className="h-6 w-6" />
+            <div className="relative group/account">
+              <Link
+                href="/account"
+                className="text-brand-dark hover:text-brand-terracotta transition-colors duration-200 relative p-1 flex items-center"
+                aria-label="Account"
+              >
+                <User className="h-6 w-6" />
+                {user && (
+                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand-terracotta ring-2 ring-brand-cream animate-pulse" />
+                )}
+              </Link>
+              
+              {/* Premium Hover Dropdown Menu */}
               {user && (
-                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand-terracotta ring-2 ring-brand-cream animate-pulse" />
+                <div className="absolute right-0 mt-1 w-48 rounded-2xl bg-brand-cream border border-brand-pink/50 shadow-xl opacity-0 invisible group-hover/account:opacity-100 group-hover/account:visible transition-all duration-300 z-50 p-2 flex flex-col gap-1">
+                  <div className="px-3 py-2 border-b border-brand-pink/20 mb-1">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-brand-terracotta">Logged In</p>
+                    <p className="text-xs font-semibold text-brand-dark truncate">{user.name}</p>
+                  </div>
+                  <Link href="/account" className="px-3 py-1.5 text-xs font-medium text-brand-dark hover:bg-brand-pink/30 hover:text-brand-terracotta rounded-lg transition-colors">
+                    My Account
+                  </Link>
+                  {user.role === 'admin' ? (
+                    <Link href="/admin" className="px-3 py-1.5 text-xs font-bold text-brand-terracotta hover:bg-brand-pink/30 rounded-lg transition-colors">
+                      Admin Dashboard
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/account" className="px-3 py-1.5 text-xs font-medium text-brand-dark hover:bg-brand-pink/30 hover:text-brand-terracotta rounded-lg transition-colors">
+                        My Orders
+                      </Link>
+                      <Link href="/account" className="px-3 py-1.5 text-xs font-medium text-brand-dark hover:bg-brand-pink/30 hover:text-brand-terracotta rounded-lg transition-colors">
+                        Wishlist
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      window.location.href = '/';
+                    }}
+                    className="w-full text-left px-3 py-1.5 text-xs font-semibold text-brand-dark hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors mt-1 border-t border-brand-pink/10"
+                  >
+                    Log Out
+                  </button>
+                </div>
               )}
-            </Link>
+            </div>
 
             {/* Shopping Cart Drawer Toggle */}
             <button
@@ -171,6 +217,27 @@ const Navbar: React.FC = () => {
               >
                 Contact
               </Link>
+              {user?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-brand-terracotta hover:text-brand-terracotta text-sm font-bold uppercase tracking-wider"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
+              {user && (
+                <button
+                  onClick={async () => {
+                    setIsMobileMenuOpen(false);
+                    await logout();
+                    window.location.href = '/';
+                  }}
+                  className="text-left text-brand-dark hover:text-brand-terracotta text-sm uppercase tracking-wider"
+                >
+                  Log Out
+                </button>
+              )}
               <Link
                 href="/shop"
                 onClick={() => setIsMobileMenuOpen(false)}

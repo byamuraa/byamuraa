@@ -5,19 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth, Address } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { ShoppingBag, MapPin, LogOut, Lock, User as UserIcon, Plus, CheckCircle, Package, Truck, Home } from 'lucide-react';
 
 export default function AccountPage() {
-  const { user, loading, login, registerFull, logout, updateAddresses } = useAuth();
+  const { user, loading, loginWithGoogle, logout, updateAddresses } = useAuth();
   const { showToast } = useToast();
 
-  // Tab control: 'login' | 'signup'
-  const [authTab, setAuthTab] = useState<'login' | 'signup'>('login');
-
-  // Form inputs: Auth
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
   // Form inputs: Address
@@ -55,41 +49,7 @@ export default function AccountPage() {
     }
   }, [user]);
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      showToast('Please enter both email and password.', 'error');
-      return;
-    }
 
-    setAuthLoading(true);
-    const res = await login(email, password);
-    setAuthLoading(false);
-    
-    if (res.success) {
-      showToast('Logged in successfully!', 'success');
-    } else {
-      showToast(res.error || 'Invalid credentials.', 'error');
-    }
-  };
-
-  const handleSignupSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email || !password) {
-      showToast('Please fill in all signup details.', 'error');
-      return;
-    }
-
-    setAuthLoading(true);
-    const res = await registerFull(name, email, password);
-    setAuthLoading(false);
-
-    if (res.success) {
-      showToast('Account created successfully!', 'success');
-    } else {
-      showToast(res.error || 'Registration failed.', 'error');
-    }
-  };
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,125 +124,29 @@ export default function AccountPage() {
   // -------------------------------------------------------------
   if (!user) {
     return (
-      <div className="mx-auto max-w-md px-4 py-16">
-        
-        {/* Toggle tabs */}
-        <div className="flex border border-brand-pink/50 rounded-full bg-white overflow-hidden p-1.5 mb-8 shadow-xs">
-          <button
-            onClick={() => setAuthTab('login')}
-            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all focus:outline-none ${
-              authTab === 'login'
-                ? 'bg-brand-terracotta text-white shadow-xs'
-                : 'text-brand-dark/60 hover:text-brand-dark'
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setAuthTab('signup')}
-            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all focus:outline-none ${
-              authTab === 'signup'
-                ? 'bg-brand-terracotta text-white shadow-xs'
-                : 'text-brand-dark/60 hover:text-brand-dark'
-            }`}
-          >
-            Join Drops
-          </button>
+      <div className="mx-auto max-w-md px-4 py-20 flex flex-col items-center">
+        <div className="text-center mb-8 flex flex-col items-center">
+          <span className="font-script text-2xl text-brand-terracotta">Amuraa Drops</span>
+          <h2 className="font-serif text-3xl font-bold text-brand-dark mt-2">Sign In to Your Account</h2>
+          <p className="text-xs text-brand-dark/60 mt-2 max-w-xs text-center">
+            Log in to view early drop passwords, track your handmade orders, and manage shipping addresses.
+          </p>
         </div>
 
-        {/* Auth form panels */}
-        <div className="bg-white border border-brand-pink/30 rounded-3xl p-6 shadow-md">
-          {authTab === 'login' ? (
-            <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
-              <div className="text-center mb-4">
-                <h2 className="font-serif text-2xl font-bold text-brand-dark">Welcome Back</h2>
-                <p className="text-xs text-brand-dark/50 mt-1">Access your slower craft drop order logs</p>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1">Email</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="name@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-full px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1">Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-full px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full bg-brand-terracotta text-white rounded-full py-3 text-xs font-bold uppercase tracking-widest hover:bg-brand-terracotta/95 transition-all mt-4"
-              >
-                {authLoading ? 'Signing In...' : 'Log In'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleSignupSubmit} className="flex flex-col gap-4">
-              <div className="text-center mb-4">
-                <h2 className="font-serif text-2xl font-bold text-brand-dark">Create Account</h2>
-                <p className="text-xs text-brand-dark/50 mt-1">Join drop early passwords & order history lists</p>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1">Your Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-full px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1">Email</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="you@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-full px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/60 block mb-1">Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="At least 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-brand-cream/30 border border-brand-pink/60 rounded-full px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-terracotta"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full bg-brand-terracotta text-white rounded-full py-3 text-xs font-bold uppercase tracking-widest hover:bg-brand-terracotta/95 transition-all mt-4"
-              >
-                {authLoading ? 'Registering...' : 'Register'}
-              </button>
-            </form>
-          )}
+        <div className="w-full bg-white border border-brand-pink/40 rounded-3xl p-8 shadow-xs flex flex-col gap-4">
+          <GoogleSignInButton
+            onClick={async () => {
+              setAuthLoading(true);
+              try {
+                await loginWithGoogle();
+              } catch (e) {
+                showToast('Authentication failed.', 'error');
+                setAuthLoading(false);
+              }
+            }}
+            loading={authLoading}
+            text="Continue with Google"
+          />
         </div>
       </div>
     );

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductById, updateProduct, deleteProduct } from '@/lib/dataService';
-import { isAdmin } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(
   req: NextRequest,
@@ -32,7 +32,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAdmin(req)) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || user.email !== 'byamuraa@gmail.com') {
       return NextResponse.json(
         { error: 'Unauthorized. Admin access required' },
         { status: 403 }
@@ -65,7 +68,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAdmin(req)) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || user.email !== 'byamuraa@gmail.com') {
       return NextResponse.json(
         { error: 'Unauthorized. Admin access required' },
         { status: 403 }

@@ -1,60 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { Lock, Mail, ShieldAlert, Sparkles } from 'lucide-react';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
+import { ShieldAlert, Sparkles } from 'lucide-react';
 import Image from 'next/image';
-
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters long'),
-});
-
-type LoginInput = z.infer<typeof loginSchema>;
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { user, loginWithGoogle } = useAuth();
   const { showToast } = useToast();
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
+  useEffect(() => {
+    // If admin is already logged in, redirect to admin dashboard
+    if (user && user.email === 'byamuraa@gmail.com') {
+      router.push('/admin');
+    }
+  }, [user, router]);
 
-  const onSubmit = async (data: LoginInput) => {
-    setSubmitting(true);
+  const handleGoogleLogin = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/admin/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
-
-      if (res.ok && result.success) {
-        showToast('Admin logged in successfully!', 'success');
-        // Force full page reload to update AuthContext state
-        window.location.href = '/admin';
-      } else {
-        showToast(result.error || 'Invalid credentials', 'error');
-      }
+      await loginWithGoogle();
     } catch (err) {
-      showToast('An unexpected error occurred.', 'error');
-    } finally {
-      setSubmitting(false);
+      showToast('An unexpected error occurred during Google Auth.', 'error');
+      setLoading(false);
     }
   };
 
@@ -82,68 +55,18 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            
-            {/* Email Field */}
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/85 block mb-1.5">
-                Admin Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-dark/40" />
-                <input
-                  {...register('email')}
-                  type="email"
-                  placeholder="admin@amuraa.com"
-                  className={`w-full bg-brand-cream/40 border ${
-                    errors.email ? 'border-red-400' : 'border-brand-pink/80'
-                  } rounded-full pl-10 pr-4 py-2.5 text-xs text-brand-dark placeholder-brand-dark/40 focus:outline-none focus:border-brand-terracotta`}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-[10px] text-red-500 font-semibold mt-1 ml-3">
-                  {errors.email.message}
-                </p>
-              )}
+        {/* Auth Button */}
+        <div className="mt-8 space-y-4">
+          <GoogleSignInButton onClick={handleGoogleLogin} loading={loading} text="Continue with Google" />
+          
+          <div className="rounded-2xl bg-brand-pink/20 border border-brand-pink/60 p-4 mt-6 flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-brand-terracotta flex-shrink-0 mt-0.5" />
+            <div className="text-[10px] text-brand-dark/80 leading-relaxed font-semibold">
+              <strong className="text-brand-terracotta block mb-0.5">Authorization Notice</strong>
+              Only registered admin emails (byamuraa@gmail.com) will be granted access to the admin dashboard. Other accounts will be redirected back to the storefront homepage.
             </div>
-
-            {/* Password Field */}
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/85 block mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-dark/40" />
-                <input
-                  {...register('password')}
-                  type="password"
-                  placeholder="••••••••"
-                  className={`w-full bg-brand-cream/40 border ${
-                    errors.password ? 'border-red-400' : 'border-brand-pink/80'
-                  } rounded-full pl-10 pr-4 py-2.5 text-xs text-brand-dark placeholder-brand-dark/40 focus:outline-none focus:border-brand-terracotta`}
-                />
-              </div>
-              {errors.password && (
-                <p className="text-[10px] text-red-500 font-semibold mt-1 ml-3">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
           </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn btn-primary w-full"
-            >
-              {submitting ? 'Authenticating...' : 'Sign In to Dashboard'}
-            </button>
-          </div>
-        </form>
+        </div>
 
       </div>
     </div>

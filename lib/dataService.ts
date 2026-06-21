@@ -1,85 +1,103 @@
-import fs from 'fs';
-import path from 'path';
-import mongoose from 'mongoose';
-import { dbConnect } from './db';
-import User from './models/User';
-import Product from './models/Product';
-import Order from './models/Order';
-import Review from './models/Review';
-import Subscriber from './models/Subscriber';
-import bcrypt from 'bcryptjs';
+import { createClient } from '@/lib/supabase/server';
 
-// Configuration
-const MOCK_DB_PATH = path.join(process.cwd(), 'lib', 'mockDb.json');
+// -------------------------------------------------------------
+// DATABASE FIELD MAPPING HELPERS
+// -------------------------------------------------------------
 
-// Memory cache for mock database in production serverless environments
-let mockDbCache: any = null;
-
-function readMockDb() {
-  if (mockDbCache) return mockDbCache;
-  try {
-    if (fs.existsSync(MOCK_DB_PATH)) {
-      const data = fs.readFileSync(MOCK_DB_PATH, 'utf-8');
-      mockDbCache = JSON.parse(data);
-      return mockDbCache;
-    }
-  } catch (error) {
-    console.error('Error reading mock DB:', error);
-  }
-  // Default structure if file read fails
-  return { products: [], users: [], orders: [], reviews: [], subscribers: [] };
+function mapProductFromDb(p: any) {
+  if (!p) return null;
+  return {
+    _id: p.id,
+    name: p.name,
+    slug: p.slug,
+    category: p.category,
+    fabric: p.fabric,
+    price: Number(p.price),
+    compareAtPrice: Number(p.compare_at_price || 0),
+    stock: p.stock,
+    status: p.status,
+    isNewDrop: p.is_new_drop,
+    isBestseller: p.is_bestseller,
+    images: p.images || [],
+    description: p.description,
+    dimensions: p.dimensions,
+    careInstructions: p.care_instructions,
+    liningColor: p.lining_color,
+    zipperType: p.zipper_type,
+    strapType: p.strap_type,
+    variants: p.variants || [],
+    seo: p.seo || { metaTitle: '', metaDesc: '' },
+    averageRating: Number(p.average_rating || 0),
+    numReviews: p.num_reviews || 0,
+    isFeatured: p.is_featured,
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+  };
 }
 
-function writeMockDb(data: any) {
-  try {
-    mockDbCache = data;
-    fs.writeFileSync(MOCK_DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing mock DB:', error);
-  }
+function mapProductToDb(p: any): any {
+  if (!p) return {};
+  return {
+    name: p.name,
+    slug: p.slug || p.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+    category: p.category,
+    fabric: p.fabric,
+    price: p.price,
+    compare_at_price: p.compareAtPrice || 0,
+    stock: p.stock,
+    status: p.status || 'active',
+    is_new_drop: p.isNewDrop || false,
+    is_bestseller: p.isBestseller || false,
+    images: p.images,
+    description: p.description,
+    dimensions: p.dimensions || '',
+    care_instructions: p.careInstructions || '',
+    lining_color: p.liningColor || '',
+    zipper_type: p.zipperType || '',
+    strap_type: p.strapType || '',
+    variants: p.variants || [],
+    seo: p.seo || { metaTitle: '', metaDesc: '' },
+    average_rating: p.averageRating || 0,
+    num_reviews: p.numReviews || 0,
+    is_featured: p.isFeatured || false,
+  };
 }
 
-let mongoStatusCache: { active: boolean; lastChecked: number } | null = null;
+function mapOrderFromDb(o: any) {
+  if (!o) return null;
+  return {
+    _id: o.id,
+    user: o.user_id,
+    email: o.email,
+    items: o.items,
+    shippingAddress: o.shipping_address,
+    totalAmount: Number(o.total_amount),
+    paymentStatus: o.payment_status,
+    paymentMethod: o.payment_method,
+    paymentIntentId: o.payment_intent_id,
+    orderStatus: o.order_status,
+    trackingNumber: o.tracking_number,
+    carrier: o.carrier,
+    createdAt: o.created_at,
+  };
+}
 
-// Check if MongoDB URI is valid and MongoDB server is up
-export async function isMongoActive(): Promise<boolean> {
-  if (!process.env.MONGODB_URI) return false;
-  
-  const now = Date.now();
-  // Return cached status if checked within the last 30 seconds
-  if (mongoStatusCache && (now - mongoStatusCache.lastChecked < 30000)) {
-    return mongoStatusCache.active;
-  }
-  
-  try {
-    // Attempt database connection with a fast timeout race
-    const connectionPromise = dbConnect();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Connection timeout')), 1500)
-    );
-    
-    await Promise.race([connectionPromise, timeoutPromise]);
-    
-    mongoStatusCache = { active: true, lastChecked: now };
-    return true;
-  } catch (e) {
-    // Cache failure status to avoid repeatedly blocking requests
-    mongoStatusCache = { active: false, lastChecked: now };
-    return false;
-  }
+function mapReviewFromDb(r: any) {
+  if (!r) return null;
+  return {
+    _id: r.id,
+    product: r.product_id,
+    user: r.user_id,
+    reviewerName: r.reviewer_name,
+    rating: r.rating,
+    comment: r.comment,
+    createdAt: r.created_at,
+  };
 }
 
 // -------------------------------------------------------------
 // PRODUCT OPERATIONS
 // -------------------------------------------------------------
-// Helper to normalize product images for storefront compatibility
-const normalizeProduct = (p: any) => {
-  if (!p) return null;
-  return {
-    ...p,
-    images: p.images ? p.images.map((img: any) => typeof img === 'string' ? img : img.url) : []
-  };
-};
 
 export async function getProducts(filters: {
   category?: string;
@@ -89,280 +107,207 @@ export async function getProducts(filters: {
   sort?: string;
   status?: string;
 } = {}) {
-  const isMongo = await isMongoActive();
-
-  if (isMongo) {
-    try {
-      const query: any = {};
-      if (filters.category) query.category = filters.category;
-      if (filters.fabric) query.fabric = filters.fabric;
-      if (filters.isFeatured !== undefined) query.isFeatured = filters.isFeatured;
-      if (filters.search) {
-        query.name = { $regex: filters.search, $options: 'i' };
-      }
-      
-      // Filter out drafts by default for storefront calls
-      if (filters.status && filters.status !== 'all') {
-        query.status = filters.status;
-      } else if (!filters.status) {
-        query.status = 'active';
-      }
-
-      let queryBuilder = Product.find(query);
-      if (filters.sort) {
-        if (filters.sort === 'price_asc') queryBuilder = queryBuilder.sort({ price: 1 });
-        else if (filters.sort === 'price_desc') queryBuilder = queryBuilder.sort({ price: -1 });
-        else if (filters.sort === 'newest') queryBuilder = queryBuilder.sort({ createdAt: -1 });
-        else if (filters.sort === 'popularity') queryBuilder = queryBuilder.sort({ averageRating: -1 });
-      }
-
-      const list = await queryBuilder.lean();
-      return list.map(normalizeProduct);
-    } catch (error) {
-      console.error('Mongoose product fetch failed, falling back to mock:', error);
-    }
-  }
-
-  // Fallback to JSON Mock DB
-  const db = readMockDb();
-  let list = [...db.products];
+  const supabase = await createClient();
+  let query = supabase.from('products').select('*');
 
   if (filters.category) {
-    list = list.filter((p: any) => p.category.toLowerCase() === filters.category!.toLowerCase());
+    query = query.ilike('category', filters.category);
   }
   if (filters.fabric) {
-    list = list.filter((p: any) => p.fabric.toLowerCase() === filters.fabric!.toLowerCase());
+    query = query.ilike('fabric', filters.fabric);
   }
   if (filters.isFeatured !== undefined) {
-    list = list.filter((p: any) => p.isFeatured === filters.isFeatured);
+    query = query.eq('is_featured', filters.isFeatured);
   }
   if (filters.search) {
-    const s = filters.search.toLowerCase();
-    list = list.filter((p: any) => p.name.toLowerCase().includes(s) || p.description.toLowerCase().includes(s));
+    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
   }
   
-  // Status filter for Mock DB
   if (filters.status && filters.status !== 'all') {
-    list = list.filter((p: any) => p.status === filters.status);
+    query = query.eq('status', filters.status);
   } else if (!filters.status) {
-    list = list.filter((p: any) => p.status === undefined || p.status === 'active');
+    query = query.eq('status', 'active');
   }
 
   if (filters.sort) {
-    if (filters.sort === 'price_asc') list.sort((a, b) => a.price - b.price);
-    else if (filters.sort === 'price_desc') list.sort((a, b) => b.price - a.price);
-    else if (filters.sort === 'newest') list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    else if (filters.sort === 'popularity') list.sort((a, b) => b.averageRating - a.averageRating);
+    if (filters.sort === 'price_asc') query = query.order('price', { ascending: true });
+    else if (filters.sort === 'price_desc') query = query.order('price', { ascending: false });
+    else if (filters.sort === 'newest') query = query.order('created_at', { ascending: false });
+    else if (filters.sort === 'popularity') query = query.order('average_rating', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
   }
 
-  return list.map(normalizeProduct);
+  const { data, error } = await query;
+  if (error) {
+    console.error('Supabase getProducts error:', error);
+    return [];
+  }
+
+  return (data || []).map(mapProductFromDb);
 }
 
 export async function getProductById(id: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
 
-  if (isMongo) {
-    try {
-      const prod = await Product.findById(id).lean();
-      return normalizeProduct(prod);
-    } catch (e) {
-      // If invalid ObjectId is passed, fallback
-    }
+  if (error) {
+    console.error('Supabase getProductById error:', error);
+    return null;
   }
-
-  const db = readMockDb();
-  const prod = db.products.find((p: any) => p._id === id) || null;
-  return normalizeProduct(prod);
+  return mapProductFromDb(data);
 }
 
 export async function createProduct(data: any) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const dbData = mapProductToDb(data);
+  const { data: inserted, error } = await supabase
+    .from('products')
+    .insert([dbData])
+    .select()
+    .single();
 
-  if (isMongo) {
-    try {
-      const prod = new Product(data);
-      return await prod.save();
-    } catch (error) {
-      console.error('Mongoose product create failed:', error);
-    }
+  if (error) {
+    console.error('Supabase createProduct error:', error);
+    throw error;
   }
-
-  const db = readMockDb();
-  const newProduct = {
-    _id: 'prod_' + Math.random().toString(36).substr(2, 9),
-    ...data,
-    createdAt: new Date().toISOString(),
-    averageRating: 0,
-    numReviews: 0,
-  };
-  db.products.push(newProduct);
-  writeMockDb(db);
-  return newProduct;
+  return mapProductFromDb(inserted);
 }
 
 export async function updateProduct(id: string, data: any) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const dbData = mapProductToDb(data);
+  
+  // Exclude values that shouldn't be overridden directly on update
+  delete (dbData as any).average_rating;
+  delete (dbData as any).num_reviews;
 
-  if (isMongo) {
-    try {
-      return await Product.findByIdAndUpdate(id, data, { new: true }).lean();
-    } catch (error) {
-      console.error('Mongoose product update failed:', error);
-    }
-  }
+  const { data: updated, error } = await supabase
+    .from('products')
+    .update(dbData)
+    .eq('id', id)
+    .select()
+    .single();
 
-  const db = readMockDb();
-  const idx = db.products.findIndex((p: any) => p._id === id);
-  if (idx !== -1) {
-    db.products[idx] = { ...db.products[idx], ...data, updatedAt: new Date().toISOString() };
-    writeMockDb(db);
-    return db.products[idx];
+  if (error) {
+    console.error('Supabase updateProduct error:', error);
+    throw error;
   }
-  return null;
+  return mapProductFromDb(updated);
 }
 
 export async function deleteProduct(id: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data: deleted, error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+    .select()
+    .maybeSingle();
 
-  if (isMongo) {
-    try {
-      return await Product.findByIdAndDelete(id).lean();
-    } catch (error) {
-      console.error('Mongoose product delete failed:', error);
-    }
+  if (error) {
+    console.error('Supabase deleteProduct error:', error);
+    throw error;
   }
-
-  const db = readMockDb();
-  const idx = db.products.findIndex((p: any) => p._id === id);
-  if (idx !== -1) {
-    const deleted = db.products.splice(idx, 1)[0];
-    writeMockDb(db);
-    return deleted;
-  }
-  return null;
+  return mapProductFromDb(deleted);
 }
 
 // -------------------------------------------------------------
 // USER OPERATIONS
 // -------------------------------------------------------------
+
 export async function getUserByEmail(email: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
 
-  if (isMongo) {
-    try {
-      return await User.findOne({ email }).lean();
-    } catch (error) {
-      console.error('Mongoose user fetch failed:', error);
-    }
-  }
-
-  const db = readMockDb();
-  return db.users.find((u: any) => u.email.toLowerCase() === email.toLowerCase()) || null;
+  if (error) return null;
+  return data;
 }
 
 export async function getUserById(id: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
 
-  if (isMongo) {
-    try {
-      return await User.findById(id).lean();
-    } catch (error) {
-      console.error('Mongoose user fetch failed:', error);
-    }
-  }
-
-  const db = readMockDb();
-  return db.users.find((u: any) => u._id === id) || null;
+  if (error) return null;
+  return data;
 }
 
 export async function createUser(data: any) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data: inserted, error } = await supabase
+    .from('profiles')
+    .insert([{
+      id: data.id,
+      email: data.email,
+      full_name: data.name,
+      is_admin: data.email === 'byamuraa@gmail.com',
+      addresses: [],
+    }])
+    .select()
+    .single();
 
-  if (isMongo) {
-    try {
-      const userObj = new User(data);
-      return await userObj.save();
-    } catch (error) {
-      console.error('Mongoose user creation failed:', error);
-    }
-  }
-
-  const db = readMockDb();
-  const newUser = {
-    _id: 'user_' + Math.random().toString(36).substr(2, 9),
-    role: 'user',
-    addresses: [],
-    ...data,
-    createdAt: new Date().toISOString(),
-  };
-  db.users.push(newUser);
-  writeMockDb(db);
-  return newUser;
+  if (error) throw error;
+  return inserted;
 }
 
 export async function updateUserAddresses(userId: string, addresses: any[]) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ addresses })
+    .eq('id', userId)
+    .select()
+    .single();
 
-  if (isMongo) {
-    try {
-      return await User.findByIdAndUpdate(userId, { addresses }, { new: true }).lean();
-    } catch (error) {
-      console.error('Mongoose address update failed:', error);
-    }
-  }
-
-  const db = readMockDb();
-  const idx = db.users.findIndex((u: any) => u._id === userId);
-  if (idx !== -1) {
-    const formattedAddresses = addresses.map((addr: any, index: number) => ({
-      _id: addr._id || 'addr_' + Math.random().toString(36).substr(2, 9),
-      ...addr,
-    }));
-    db.users[idx].addresses = formattedAddresses;
-    writeMockDb(db);
-    return db.users[idx];
-  }
-  return null;
+  if (error) throw error;
+  return data;
 }
 
 // -------------------------------------------------------------
 // ORDER OPERATIONS
 // -------------------------------------------------------------
+
 export async function getOrders(userId?: string) {
-  const isMongo = await isMongoActive();
-
-  if (isMongo) {
-    try {
-      const query = userId ? { user: userId } : {};
-      return await Order.find(query).sort({ createdAt: -1 }).lean();
-    } catch (error) {
-      console.error('Mongoose order fetch failed:', error);
-    }
-  }
-
-  const db = readMockDb();
-  let list = [...db.orders];
+  const supabase = await createClient();
+  let query = supabase.from('orders').select('*');
+  
   if (userId) {
-    list = list.filter((o: any) => o.user === userId);
+    query = query.eq('user_id', userId);
   }
-  // Sort descending
-  list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  return list;
+  
+  const { data, error } = await query.order('created_at', { ascending: false });
+  if (error) {
+    console.error('Supabase getOrders error:', error);
+    return [];
+  }
+  return (data || []).map(mapOrderFromDb);
 }
 
 export async function getOrderById(id: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
 
-  if (isMongo) {
-    try {
-      return await Order.findById(id).lean();
-    } catch (error) {
-      console.error('Mongoose order by ID failed:', error);
-    }
+  if (error) {
+    console.error('Supabase getOrderById error:', error);
+    return null;
   }
-
-  const db = readMockDb();
-  return db.orders.find((o: any) => o._id === id) || null;
+  return mapOrderFromDb(data);
 }
 
 export async function createOrder(data: {
@@ -390,83 +335,66 @@ export async function createOrder(data: {
   paymentStatus?: string;
   paymentIntentId?: string;
 }) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
 
-  // 1. Check stock levels and decrement
-  if (isMongo) {
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      
-      // Check stock for all items
-      for (const item of data.items) {
-        const prod = await Product.findById(item.product).session(session);
-        if (!prod || prod.stock < item.quantity) {
-          throw new Error(`Insufficient stock for ${item.name} (${item.fabric})`);
-        }
-      }
-
-      // Decrement stock
-      for (const item of data.items) {
-        await Product.findByIdAndUpdate(
-          item.product,
-          { $inc: { stock: -item.quantity } },
-          { session }
-        );
-      }
-
-      // Save order
-      const newOrder = new Order({
-        ...data,
-        paymentStatus: data.paymentStatus || 'Pending',
-        orderStatus: 'Processing',
-      });
-      await newOrder.save({ session });
-      
-      await session.commitTransaction();
-      session.endSession();
-      return newOrder;
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      console.error('Mongoose checkout transaction aborted:', error);
-      throw error;
-    }
-  }
-
-  // In-memory fallback
-  const db = readMockDb();
-  
-  // Verify stock
+  // 1. Check stock levels for all products
   for (const item of data.items) {
-    const prod = db.products.find((p: any) => p._id === item.product);
-    if (!prod || prod.stock < item.quantity) {
-      throw new Error(`Insufficient stock for ${item.name} (${item.fabric})`);
+    const { data: prod, error } = await supabase
+      .from('products')
+      .select('stock, name')
+      .eq('id', item.product)
+      .single();
+
+    if (error || !prod) {
+      throw new Error(`Product ${item.name} not found`);
+    }
+    if (prod.stock < item.quantity) {
+      throw new Error(`Insufficient stock for ${item.name}`);
     }
   }
 
-  // Decrement stock
+  // 2. Decrement stock levels
   for (const item of data.items) {
-    const idx = db.products.findIndex((p: any) => p._id === item.product);
-    if (idx !== -1) {
-      db.products[idx].stock -= item.quantity;
+    const { data: prod } = await supabase
+      .from('products')
+      .select('stock')
+      .eq('id', item.product)
+      .single();
+
+    const newStock = (prod?.stock || 0) - item.quantity;
+    const { error: updateErr } = await supabase
+      .from('products')
+      .update({ stock: newStock })
+      .eq('id', item.product);
+
+    if (updateErr) {
+      throw new Error(`Failed to update stock for product ID: ${item.product}`);
     }
   }
 
-  // Create order
-  const newOrder = {
-    _id: 'ord_' + Math.random().toString(36).substr(2, 9),
-    ...data,
-    paymentStatus: data.paymentStatus || 'Pending',
-    orderStatus: 'Processing',
-    trackingNumber: '',
-    carrier: '',
-    createdAt: new Date().toISOString(),
-  };
+  // 3. Create the order
+  const { data: inserted, error: orderErr } = await supabase
+    .from('orders')
+    .insert([{
+      user_id: data.user || null,
+      email: data.email,
+      items: data.items, // JSONB structure
+      total_amount: data.totalAmount,
+      shipping_address: data.shippingAddress, // JSONB structure
+      payment_status: data.paymentStatus || 'Pending',
+      payment_method: data.paymentMethod || 'Stripe',
+      payment_intent_id: data.paymentIntentId || '',
+      order_status: 'Processing',
+    }])
+    .select()
+    .single();
 
-  db.orders.push(newOrder);
-  writeMockDb(db);
-  return newOrder;
+  if (orderErr) {
+    console.error('Supabase createOrder error:', orderErr);
+    throw orderErr;
+  }
+
+  return mapOrderFromDb(inserted);
 }
 
 export async function updateOrderStatus(id: string, updates: {
@@ -476,43 +404,45 @@ export async function updateOrderStatus(id: string, updates: {
   carrier?: string;
   paymentIntentId?: string;
 }) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const dbUpdates: any = {};
+  if (updates.orderStatus) dbUpdates.order_status = updates.orderStatus;
+  if (updates.paymentStatus) dbUpdates.payment_status = updates.paymentStatus;
+  if (updates.trackingNumber !== undefined) dbUpdates.tracking_number = updates.trackingNumber;
+  if (updates.carrier !== undefined) dbUpdates.carrier = updates.carrier;
+  if (updates.paymentIntentId !== undefined) dbUpdates.payment_intent_id = updates.paymentIntentId;
 
-  if (isMongo) {
-    try {
-      return await Order.findByIdAndUpdate(id, updates, { new: true }).lean();
-    } catch (error) {
-      console.error('Mongoose order status update failed:', error);
-    }
-  }
+  const { data, error } = await supabase
+    .from('orders')
+    .update(dbUpdates)
+    .eq('id', id)
+    .select()
+    .maybeSingle();
 
-  const db = readMockDb();
-  const idx = db.orders.findIndex((o: any) => o._id === id);
-  if (idx !== -1) {
-    db.orders[idx] = { ...db.orders[idx], ...updates, updatedAt: new Date().toISOString() };
-    writeMockDb(db);
-    return db.orders[idx];
+  if (error) {
+    console.error('Supabase updateOrderStatus error:', error);
+    throw error;
   }
-  return null;
+  return mapOrderFromDb(data);
 }
 
 // -------------------------------------------------------------
 // REVIEW OPERATIONS
 // -------------------------------------------------------------
+
 export async function getReviews(productId: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false });
 
-  if (isMongo) {
-    try {
-      return await Review.find({ product: productId }).sort({ createdAt: -1 }).lean();
-    } catch (error) {
-      console.error('Mongoose reviews fetch failed:', error);
-    }
+  if (error) {
+    console.error('Supabase getReviews error:', error);
+    return [];
   }
-
-  const db = readMockDb();
-  return db.reviews.filter((r: any) => r.product === productId)
-                   .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return (data || []).map(mapReviewFromDb);
 }
 
 export async function createReview(data: {
@@ -522,89 +452,85 @@ export async function createReview(data: {
   rating: number;
   comment: string;
 }) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  
+  // Insert the review
+  const { data: inserted, error: reviewErr } = await supabase
+    .from('reviews')
+    .insert([{
+      product_id: data.product,
+      user_id: data.user || null,
+      reviewer_name: data.reviewerName,
+      rating: data.rating,
+      comment: data.comment,
+    }])
+    .select()
+    .single();
 
-  if (isMongo) {
-    try {
-      const reviewObj = new Review(data);
-      const savedReview = await reviewObj.save();
-
-      // Recalculate averageRating for product
-      const reviews = await Review.find({ product: data.product });
-      const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-      await Product.findByIdAndUpdate(data.product, {
-        averageRating: parseFloat(avg.toFixed(1)),
-        numReviews: reviews.length
-      });
-
-      return savedReview;
-    } catch (error) {
-      console.error('Mongoose review save failed:', error);
-    }
+  if (reviewErr) {
+    console.error('Supabase createReview error:', reviewErr);
+    throw reviewErr;
   }
 
-  const db = readMockDb();
-  const newReview = {
-    _id: 'rev_' + Math.random().toString(36).substr(2, 9),
-    ...data,
-    createdAt: new Date().toISOString(),
-  };
+  // Recalculate average rating and review count
+  const { data: reviews, error: fetchErr } = await supabase
+    .from('reviews')
+    .select('rating')
+    .eq('product_id', data.product);
 
-  db.reviews.push(newReview);
+  if (!fetchErr && reviews && reviews.length > 0) {
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const avg = Number((totalRating / reviews.length).toFixed(1));
+    const count = reviews.length;
 
-  // Recalculate product rating
-  const prodIdx = db.products.findIndex((p: any) => p._id === data.product);
-  if (prodIdx !== -1) {
-    const productReviews = db.reviews.filter((r: any) => r.product === data.product);
-    const avg = productReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / productReviews.length;
-    db.products[prodIdx].averageRating = parseFloat(avg.toFixed(1));
-    db.products[prodIdx].numReviews = productReviews.length;
+    await supabase
+      .from('products')
+      .update({ average_rating: avg, num_reviews: count })
+      .eq('id', data.product);
   }
 
-  writeMockDb(db);
-  return newReview;
+  return mapReviewFromDb(inserted);
 }
 
 // -------------------------------------------------------------
 // NEWSLETTER OPERATIONS
 // -------------------------------------------------------------
+
 export async function addSubscriber(email: string) {
-  const isMongo = await isMongoActive();
+  const supabase = await createClient();
+  
+  // Check if exists
+  const { data: existing } = await supabase
+    .from('subscribers')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
 
-  if (isMongo) {
-    try {
-      const existing = await Subscriber.findOne({ email });
-      if (existing) return existing;
-      const sub = new Subscriber({ email });
-      return await sub.save();
-    } catch (error) {
-      console.error('Mongoose subscriber save failed:', error);
-    }
+  if (existing) return existing;
+
+  const { data: inserted, error } = await supabase
+    .from('subscribers')
+    .insert([{ email: email.toLowerCase() }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Supabase addSubscriber error:', error);
+    throw error;
   }
-
-  const db = readMockDb();
-  const exists = db.subscribers.find((s: any) => s.email.toLowerCase() === email.toLowerCase());
-  if (exists) return exists;
-
-  const newSub = {
-    _id: 'sub_' + Math.random().toString(36).substr(2, 9),
-    email,
-    createdAt: new Date().toISOString()
-  };
-  db.subscribers.push(newSub);
-  writeMockDb(db);
-  return newSub;
+  return inserted;
 }
 
 export async function getSubscribers() {
-  const isMongo = await isMongoActive();
-  if (isMongo) {
-    try {
-      return await Subscriber.find().lean();
-    } catch (e) {
-      console.error(e);
-    }
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('subscribers')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Supabase getSubscribers error:', error);
+    return [];
   }
-  const db = readMockDb();
-  return db.subscribers;
+  return data || [];
 }

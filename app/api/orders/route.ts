@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrders, createOrder } from '@/lib/dataService';
-import { getAuthUser, isAdmin } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   try {
-    const authUser = getAuthUser(req);
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
     if (!authUser) {
       return NextResponse.json(
         { error: 'Unauthorized. Please log in.' },
@@ -12,13 +14,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const isAdmin = authUser.email === 'byamuraa@gmail.com';
     let orders;
-    if (authUser.role === 'admin') {
+
+    if (isAdmin) {
       // Admin sees all orders
       orders = await getOrders();
     } else {
       // Normal user sees their own orders
-      orders = await getOrders(authUser.userId);
+      orders = await getOrders(authUser.id);
     }
 
     return NextResponse.json({ success: true, orders });
@@ -43,11 +47,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const authUser = getAuthUser(req);
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
 
     // Create the order. Decrementing stock is handled atomically in dataService.
     const newOrder = await createOrder({
-      user: authUser ? authUser.userId : null, // Null for guest checkout
+      user: authUser ? authUser.id : null, // Null for guest checkout
       email,
       items,
       shippingAddress,

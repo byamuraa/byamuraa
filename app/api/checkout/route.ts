@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createOrder, updateOrderStatus } from '@/lib/dataService';
-import { getAuthUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -26,13 +26,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const authUser = getAuthUser(req);
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
 
     // 1. Create the order in "Pending" state (this also checks stock and decrements it)
     let order;
     try {
       order = await createOrder({
-        user: authUser ? authUser.userId : null,
+        user: authUser ? authUser.id : null,
         email,
         items,
         shippingAddress,
@@ -48,9 +49,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!order) {
+      return NextResponse.json(
+        { error: 'Order creation failed' },
+        { status: 500 }
+      );
+    }
+
     const orderId = order._id.toString();
 
-    // 2. If Stripe is not configured, redirect to a beautiful local mock payment gateway
+    // 2. If Stripe is not configured, redirect to local mock payment gateway
     if (!stripe) {
       return NextResponse.json({
         success: true,

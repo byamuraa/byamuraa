@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-import { getAuthUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
+import { uploadImage, deleteImage } from '@/lib/supabase/uploadImage';
 
-// Configure Cloudinary if credentials exist
-const isCloudinaryConfigured = 
-  process.env.CLOUDINARY_CLOUD_NAME && 
-  process.env.CLOUDINARY_API_KEY && 
-  process.env.CLOUDINARY_API_SECRET;
-
-if (isCloudinaryConfigured) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
-
-// 1. POST - Upload image
+// 1. POST - Upload image to Supabase Storage
 export async function POST(req: NextRequest) {
   try {
-    // Auth guard (double check signature)
-    const admin = getAuthUser(req);
-    if (!admin || admin.role !== 'admin') {
+    // Auth guard: Check if authenticated user is the admin
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user || user.email !== 'byamuraa@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -32,40 +20,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Fallback if Cloudinary is not configured
-    if (!isCloudinaryConfigured) {
-      const mockImages = [
-        '/images/products/tote_pink_leopard_1.jpg',
-        '/images/products/mini_heart_1.jpg',
-        '/images/products/tote_mauve_check_1.jpg',
-        '/images/products/shoulder_striped_1.jpg',
-        '/images/products/tote_pink_polka_1.jpg',
-        '/images/products/organizer_indigo_1.jpg',
-      ];
-      const randomMockImage = mockImages[Math.floor(Math.random() * mockImages.length)];
-
-      return NextResponse.json({
-        url: randomMockImage,
-        publicId: `mock_${Date.now()}`,
-        warning: 'Cloudinary credentials are not configured. Falling back to local mock image.',
-      });
-    }
-
-    // Convert file to base64 buffer for Cloudinary SDK
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const fileBase64 = `data:${file.type};base64,${buffer.toString('base64')}`;
-
-    const uploadResponse = await cloudinary.uploader.upload(fileBase64, {
-      folder: 'amuraa',
-    });
+    const result = await uploadImage(file);
 
     return NextResponse.json({
-      url: uploadResponse.secure_url,
-      publicId: uploadResponse.public_id,
+      url: result.url,
+      publicId: result.path, // Mapping 'path' to 'publicId' to maintain compatibility with front-end
     });
   } catch (error: any) {
-    console.error('Image Upload Error:', error);
+    console.error('Supabase Image Upload Error:', error);
     return NextResponse.json(
       { error: error.message || 'Image upload failed' },
       { status: 500 }
@@ -73,42 +35,40 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// 2. DELETE - Destroy image
+// 2. DELETE - Destroy image in Supabase Storage
 export async function DELETE(req: NextRequest) {
   try {
     // Auth guard
-    const admin = getAuthUser(req);
-    if (!admin || admin.role !== 'admin') {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user || user.email !== 'byamuraa@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { publicId } = await req.json();
 
     if (!publicId) {
-      return NextResponse.json({ error: 'publicId is required' }, { status: 400 });
+      return NextResponse.json({ error: 'publicId (image path) is required' }, { status: 400 });
     }
 
-    // Mock bypass
+    // Handle mock image bypass if any exist
     if (publicId.startsWith('mock_')) {
       return NextResponse.json({ success: true, message: 'Mock image delete complete' });
     }
 
-    if (!isCloudinaryConfigured) {
-      return NextResponse.json({ error: 'Cloudinary not configured' }, { status: 500 });
-    }
+    const success = await deleteImage(publicId);
 
-    const deleteResponse = await cloudinary.uploader.destroy(publicId);
-
-    if (deleteResponse.result === 'ok') {
+    if (success) {
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
-        { error: `Cloudinary delete failed: ${deleteResponse.result}` },
+        { error: 'Failed to delete image from storage' },
         { status: 400 }
       );
     }
   } catch (error: any) {
-    console.error('Image Delete Error:', error);
+    console.error('Supabase Image Delete Error:', error);
     return NextResponse.json(
       { error: error.message || 'Image delete failed' },
       { status: 500 }

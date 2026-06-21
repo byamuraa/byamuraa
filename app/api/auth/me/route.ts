@@ -1,38 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { getUserById, updateUserAddresses } from '@/lib/dataService';
-import { getAuthUser } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
-    const authPayload = getAuthUser(req);
-    if (!authPayload) {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) {
       return NextResponse.json({ user: null });
     }
 
-    if (authPayload.userId === 'admin') {
-      return NextResponse.json({
-        user: {
-          id: 'admin',
-          name: 'Amuraa Admin',
-          email: authPayload.email,
-          role: 'admin',
-          addresses: [],
-        },
-      });
-    }
-
-    const user = await getUserById(authPayload.userId);
-    if (!user) {
+    const profile = await getUserById(authUser.id);
+    if (!profile) {
       return NextResponse.json({ user: null });
     }
 
     return NextResponse.json({
       user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        role: user.role || 'user',
-        addresses: user.addresses || [],
+        id: profile.id,
+        name: profile.full_name || 'Amuraa User',
+        email: profile.email,
+        role: profile.email === 'byamuraa@gmail.com' || profile.is_admin ? 'admin' : 'user',
+        addresses: profile.addresses || [],
       },
     });
   } catch (error) {
@@ -46,12 +35,10 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const authPayload = getAuthUser(req);
-    if (!authPayload) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { addresses } = await req.json();
@@ -63,7 +50,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const updatedUser = await updateUserAddresses(authPayload.userId, addresses);
+    const updatedUser = await updateUserAddresses(authUser.id, addresses);
     if (!updatedUser) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -74,10 +61,10 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({
       success: true,
       user: {
-        id: updatedUser._id.toString(),
-        name: updatedUser.name,
+        id: updatedUser.id,
+        name: updatedUser.full_name || 'Amuraa User',
         email: updatedUser.email,
-        role: updatedUser.role || 'user',
+        role: updatedUser.email === 'byamuraa@gmail.com' || updatedUser.is_admin ? 'admin' : 'user',
         addresses: updatedUser.addresses || [],
       },
     });

@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrderById, updateOrderStatus } from '@/lib/dataService';
-import { getAuthUser, isAdmin } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authUser = getAuthUser(req);
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
     if (!authUser) {
       return NextResponse.json(
         { error: 'Unauthorized. Please log in.' },
@@ -25,8 +27,10 @@ export async function GET(
       );
     }
 
+    const isAdmin = authUser.email === 'byamuraa@gmail.com';
+
     // Access control: User can only see their own order; Admin can see all
-    if (authUser.role !== 'admin' && order.user?.toString() !== authUser.userId) {
+    if (!isAdmin && order.user?.toString() !== authUser.id) {
       return NextResponse.json(
         { error: 'Forbidden. You do not have access to this order.' },
         { status: 403 }
@@ -48,7 +52,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAdmin(req)) {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
+    const isAdmin = authUser?.email === 'byamuraa@gmail.com';
+    if (!isAdmin) {
       return NextResponse.json(
         { error: 'Unauthorized. Admin access required' },
         { status: 403 }

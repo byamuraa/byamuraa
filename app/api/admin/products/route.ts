@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbConnect } from '@/lib/db';
-import Product from '@/lib/models/Product';
-import { getAuthUser } from '@/lib/auth';
-import { isMongoActive, getProducts, createProduct } from '@/lib/dataService';
+import { createClient } from '@/lib/supabase/server';
+import { getProducts, createProduct } from '@/lib/dataService';
+
+// Helper to check authentication
+async function checkAuth() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user && user.email === 'byamuraa@gmail.com';
+  } catch {
+    return false;
+  }
+}
 
 // 1. GET - Fetch products list with filters & pagination
 export async function GET(req: NextRequest) {
   try {
     // Auth Guard
-    const admin = getAuthUser(req);
-    if (!admin || admin.role !== 'admin') {
+    if (!(await checkAuth())) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const isMongo = await isMongoActive();
-    if (isMongo) {
-      await dbConnect();
     }
 
     const searchParams = req.nextUrl.searchParams;
@@ -27,43 +30,9 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    const query: any = {};
-    
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { fabric: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    if (category) {
-      query.category = category;
-    }
-
-    // Sort mapping
-    let sortObj: any = { createdAt: -1 };
-    if (sort === 'price_asc') sortObj = { price: 1 };
-    else if (sort === 'price_desc') sortObj = { price: -1 };
-    else if (sort === 'stock_asc') sortObj = { stock: 1 };
-    else if (sort === 'stock_desc') sortObj = { stock: -1 };
-    else if (sort === 'newest') sortObj = { createdAt: -1 };
-
-    let total = 0;
-    let products = [];
-
-    if (isMongo) {
-      total = await Product.countDocuments(query);
-      products = await Product.find(query)
-        .sort(sortObj)
-        .skip(skip)
-        .limit(limit);
-    } else {
-      const allProducts = await getProducts({ category, search, sort, status: 'all' });
-      total = allProducts.length;
-      products = allProducts.slice(skip, skip + limit);
-    }
+    const allProducts = await getProducts({ category, search, sort, status: 'all' });
+    const total = allProducts.length;
+    const products = allProducts.slice(skip, skip + limit);
 
     return NextResponse.json({
       success: true,
@@ -88,14 +57,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Auth Guard
-    const admin = getAuthUser(req);
-    if (!admin || admin.role !== 'admin') {
+    if (!(await checkAuth())) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const isMongo = await isMongoActive();
-    if (isMongo) {
-      await dbConnect();
     }
 
     const body = await req.json();
@@ -129,19 +92,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Create unique slug
-    let generatedSlug = name
+    const generatedSlug = name
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
-
-    if (isMongo) {
-      // Check slug uniqueness and append random string if duplicate
-      const existingSlug = await Product.findOne({ slug: generatedSlug });
-      if (existingSlug) {
-        generatedSlug = `${generatedSlug}-${Math.random().toString(36).substring(2, 6)}`;
-      }
-    }
 
     const payload = {
       name,

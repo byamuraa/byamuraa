@@ -1,48 +1,68 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder_anon_key';
+
+  const supabase = createServerClient(
+    url,
+    anonKey,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { pathname } = request.nextUrl;
 
-  // Bypass login page
-  if (pathname === '/admin/login') {
-    return NextResponse.next();
-  }
-
-  const token = request.cookies.get('token')?.value;
-
-  if (!token) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
-  }
-
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+  // 1. Secure Admin directory
+  if (pathname.startsWith('/admin')) {
+    // Exclude /admin/login page from authentication check
+    if (pathname !== '/admin/login') {
+      if (!user || user.email !== 'byamuraa@gmail.com') {
+        // Redirect unauthorized users to the storefront homepage
+        return NextResponse.redirect(new URL('/', request.url));
+      }
     }
-
-    // Edge-safe base64url decoding of JWT payload
-    const payload = JSON.parse(
-      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
-    );
-
-    const isExpired = payload.exp ? payload.exp * 1000 < Date.now() : false;
-
-    if (payload.role !== 'admin' || isExpired) {
-      const response = NextResponse.redirect(new URL('/admin/login', request.url));
-      response.cookies.delete('token');
-      return response;
-    }
-
-    return NextResponse.next();
-  } catch (error) {
-    const response = NextResponse.redirect(new URL('/admin/login', request.url));
-    response.cookies.delete('token');
-    return response;
   }
+
+  // 2. Secure Customer Account directory
+  if (pathname.startsWith('/account')) {
+    if (!user) {
+      // Redirect unauthenticated users to the homepage
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
+
+  return response;
 }
 
-// Protect all /admin routes
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/account/:path*'],
 };
