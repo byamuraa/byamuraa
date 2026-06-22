@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 // -------------------------------------------------------------
 // DATABASE FIELD MAPPING HELPERS
@@ -365,7 +365,7 @@ export async function createOrder(data: {
   paymentStatus?: string;
   paymentIntentId?: string;
 }) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Check stock levels for all products
   for (const item of data.items) {
@@ -434,7 +434,7 @@ export async function updateOrderStatus(id: string, updates: {
   carrier?: string;
   paymentIntentId?: string;
 }) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const dbUpdates: any = {};
   if (updates.orderStatus) dbUpdates.order_status = updates.orderStatus;
   if (updates.paymentStatus) dbUpdates.payment_status = updates.paymentStatus;
@@ -482,7 +482,7 @@ export async function createReview(data: {
   rating: number;
   comment: string;
 }) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   
   // Insert the review
   const { data: inserted, error: reviewErr } = await supabase

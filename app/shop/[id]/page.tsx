@@ -266,8 +266,17 @@ export default function ProductDetailPage() {
           {/* Pricing Box */}
           <div className="bg-brand-pink/30 border border-brand-pink/50 rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <span className="text-[10px] uppercase font-bold text-brand-terracotta">Prepaid Order Price</span>
-              <p className="font-serif text-3xl font-bold text-brand-terracotta mt-0.5">${product.price}</p>
+              <span className="text-[10px] uppercase font-bold text-brand-terracotta">
+                {quantity > 1 ? 'Total Prepaid Price' : 'Prepaid Order Price'}
+              </span>
+              <p className="font-serif text-3xl font-bold text-brand-terracotta mt-0.5">
+                ${product.price * quantity}
+                {quantity > 1 && (
+                  <span className="text-xs text-brand-dark/50 ml-2 font-sans font-normal">
+                    (${product.price} each)
+                  </span>
+                )}
+              </p>
             </div>
             <span className="text-[10px] bg-brand-terracotta/10 text-brand-terracotta border border-brand-terracotta/20 rounded-full px-3 py-1 font-bold uppercase tracking-wider">
               Free Shipping
