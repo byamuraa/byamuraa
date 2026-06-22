@@ -52,8 +52,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'publicId (image path) is required' }, { status: 400 });
     }
 
-    // Handle mock image bypass if any exist
-    if (publicId.startsWith('mock_')) {
+    // Handle mock or legacy image bypass if any exist
+    if (publicId.startsWith('mock_') || publicId.startsWith('legacy_')) {
       return NextResponse.json({ success: true, message: 'Mock image delete complete' });
     }
 

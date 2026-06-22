@@ -18,7 +18,17 @@ function mapProductFromDb(p: any) {
     status: p.status,
     isNewDrop: p.is_new_drop,
     isBestseller: p.is_bestseller,
-    images: p.images || [],
+    images: (p.images || []).map((img: any) => {
+      if (typeof img === 'string') {
+        try {
+          const parsed = JSON.parse(img);
+          return parsed.url || img;
+        } catch {
+          return img;
+        }
+      }
+      return img?.url || img;
+    }),
     description: p.description,
     dimensions: p.dimensions,
     careInstructions: p.care_instructions,
@@ -37,30 +47,50 @@ function mapProductFromDb(p: any) {
 
 function mapProductToDb(p: any): any {
   if (!p) return {};
-  return {
-    name: p.name,
-    slug: p.slug || p.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
-    category: p.category,
-    fabric: p.fabric,
-    price: p.price,
-    compare_at_price: p.compareAtPrice || 0,
-    stock: p.stock,
-    status: p.status || 'active',
-    is_new_drop: p.isNewDrop || false,
-    is_bestseller: p.isBestseller || false,
-    images: p.images,
-    description: p.description,
-    dimensions: p.dimensions || '',
-    care_instructions: p.careInstructions || '',
-    lining_color: p.liningColor || '',
-    zipper_type: p.zipperType || '',
-    strap_type: p.strapType || '',
-    variants: p.variants || [],
-    seo: p.seo || { metaTitle: '', metaDesc: '' },
-    average_rating: p.averageRating || 0,
-    num_reviews: p.numReviews || 0,
-    is_featured: p.isFeatured || false,
-  };
+  const dbData: any = {};
+
+  if (p.name !== undefined) dbData.name = p.name;
+  if (p.slug !== undefined) {
+    dbData.slug = p.slug;
+  } else if (p.name !== undefined) {
+    dbData.slug = p.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  }
+  if (p.category !== undefined) dbData.category = p.category;
+  if (p.fabric !== undefined) dbData.fabric = p.fabric;
+  if (p.price !== undefined) dbData.price = p.price;
+  if (p.compareAtPrice !== undefined) dbData.compare_at_price = p.compareAtPrice;
+  if (p.stock !== undefined) dbData.stock = p.stock;
+  if (p.status !== undefined) dbData.status = p.status;
+  if (p.isNewDrop !== undefined) dbData.is_new_drop = p.isNewDrop;
+  if (p.isBestseller !== undefined) dbData.is_bestseller = p.isBestseller;
+  
+  if (p.images !== undefined) {
+    dbData.images = p.images.map((img: any) => {
+      if (typeof img === 'string') {
+        try {
+          const parsed = JSON.parse(img);
+          return parsed.url || img;
+        } catch {
+          return img;
+        }
+      }
+      return img?.url || '';
+    }).filter(Boolean);
+  }
+  
+  if (p.description !== undefined) dbData.description = p.description;
+  if (p.dimensions !== undefined) dbData.dimensions = p.dimensions;
+  if (p.careInstructions !== undefined) dbData.care_instructions = p.careInstructions;
+  if (p.liningColor !== undefined) dbData.lining_color = p.liningColor;
+  if (p.zipperType !== undefined) dbData.zipper_type = p.zipperType;
+  if (p.strapType !== undefined) dbData.strap_type = p.strapType;
+  if (p.variants !== undefined) dbData.variants = p.variants;
+  if (p.seo !== undefined) dbData.seo = p.seo;
+  if (p.averageRating !== undefined) dbData.average_rating = p.averageRating;
+  if (p.numReviews !== undefined) dbData.num_reviews = p.numReviews;
+  if (p.isFeatured !== undefined) dbData.is_featured = p.isFeatured;
+
+  return dbData;
 }
 
 function mapOrderFromDb(o: any) {
