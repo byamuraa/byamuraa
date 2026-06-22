@@ -45,14 +45,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await fetchUserProfile(session.user.id, session.user.email || '', session.user.user_metadata);
+          // Set initial user details immediately from metadata so UI doesn't hang
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'Amuraa User',
+            role: session.user.email === 'byamuraa@gmail.com' ? 'admin' : 'user',
+            addresses: [],
+          });
+          setLoading(false);
+          // Fetch full profile (role, addresses) in background
+          fetchUserProfile(session.user.id, session.user.email || '', session.user.user_metadata);
         } else {
           setUser(null);
+          setLoading(false);
         }
       } catch (err) {
         console.error('Error checking user session:', err);
         setUser(null);
-      } finally {
         setLoading(false);
       }
     };
@@ -61,13 +71,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setLoading(true);
-      if (session?.user) {
-        await fetchUserProfile(session.user.id, session.user.email || '', session.user.user_metadata);
-      } else {
+      try {
+        if (session?.user) {
+          // Set initial user details immediately from metadata so UI doesn't hang
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'Amuraa User',
+            role: session.user.email === 'byamuraa@gmail.com' ? 'admin' : 'user',
+            addresses: [],
+          });
+          setLoading(false);
+          // Fetch full profile in background
+          fetchUserProfile(session.user.id, session.user.email || '', session.user.user_metadata);
+        } else {
+          setUser(null);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error in auth state change listener:', err);
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
