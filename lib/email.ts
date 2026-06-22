@@ -105,3 +105,51 @@ ${message}
     console.log('-------------------------------------------\n');
   }
 }
+
+export async function sendAdminOrderNotification(order: any) {
+  const transporter = createTransporter();
+  const subject = `[Admin Alert] New Order Received - Amuraa Drop [#${order._id.toString().slice(-6).toUpperCase()}]`;
+
+  const itemSummary = order.items
+    .map((item: any) => `- ${item.name} (${item.fabric}) x${item.quantity} - $${item.price}`)
+    .join('\n');
+
+  const textContent = `
+A new order has been placed on Amuraa Drops!
+
+Order Details:
+Order ID: ${order._id}
+Customer Email: ${order.email}
+Total Amount: $${order.totalAmount}
+Payment Status: ${order.paymentStatus}
+
+Items:
+${itemSummary}
+
+Shipping Address:
+${order.shippingAddress.name}
+${order.shippingAddress.street}
+${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}
+${order.shippingAddress.country}
+  `;
+
+  if (transporter) {
+    try {
+      await transporter.sendMail({
+        from: '"Amuraa Orders" <orders@amuraa.com>',
+        to: ADMIN_EMAIL,
+        subject,
+        text: textContent,
+      });
+      console.log(`Admin order notification email sent to ${ADMIN_EMAIL}`);
+    } catch (error) {
+      console.error('Nodemailer failed to send admin notification:', error);
+    }
+  } else {
+    console.log('\n--- MOCK EMAIL OUTBOX (ADMIN ORDER NOTIFICATION) ---');
+    console.log(`To: ${ADMIN_EMAIL}`);
+    console.log(`Subject: ${subject}`);
+    console.log(textContent);
+    console.log('----------------------------------------------------\n');
+  }
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getOrderById, updateOrderStatus } from '@/lib/dataService';
-import { sendOrderConfirmation } from '@/lib/email';
+import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 let stripe: Stripe | null = null;
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
           if (updatedOrder) {
             // Trigger email confirmation
             await sendOrderConfirmation(updatedOrder.email, updatedOrder);
+            await sendAdminOrderNotification(updatedOrder);
             return NextResponse.json({ success: true, order: updatedOrder });
           }
         }
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
         
         if (updatedOrder) {
           await sendOrderConfirmation(updatedOrder.email, updatedOrder);
+          await sendAdminOrderNotification(updatedOrder);
           return NextResponse.json({ success: true, order: updatedOrder });
         }
       }
