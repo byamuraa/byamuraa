@@ -1,3 +1,4 @@
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -30,28 +31,17 @@ export async function createClient() {
 }
 
 export async function createAdminClient() {
-  const cookieStore = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_service_role_key';
 
-  return createServerClient(
+  return createSupabaseClient(
     url,
     serviceRoleKey,
     {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Ignored
-          }
-        },
-      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
     }
   );
 }
