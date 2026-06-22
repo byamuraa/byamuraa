@@ -50,7 +50,7 @@ export default function ShopPage() {
         if (search) queryParams.append('search', search);
         if (sortBy) queryParams.append('sort', sortBy);
 
-        const res = await fetch(`/api/products?${queryParams.toString()}`);
+        const res = await fetch(`/api/products?${queryParams.toString()}`, { cache: 'no-store' });
         const data = await res.json();
         if (data.products) {
           // Client-side filter for price range limit

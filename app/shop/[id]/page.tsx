@@ -47,7 +47,7 @@ export default function ProductDetailPage() {
       setLoading(true);
       try {
         // 1. Fetch Product
-        const prodRes = await fetch(`/api/products/${id}`);
+        const prodRes = await fetch(`/api/products/${id}`, { cache: 'no-store' });
         const prodData = await prodRes.json();
         if (prodData.product) {
           const p = prodData.product as Product;
@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
           setSelectedImage(p.images[0]);
 
           // 2. Fetch Related Products
-          const allRes = await fetch(`/api/products?category=${encodeURIComponent(p.category)}`);
+          const allRes = await fetch(`/api/products?category=${encodeURIComponent(p.category)}`, { cache: 'no-store' });
           const allData = await allRes.json();
           if (allData.products) {
             const related = (allData.products as Product[]).filter(item => item._id !== p._id).slice(0, 4);
@@ -127,7 +127,7 @@ export default function ProductDetailPage() {
       image: product.images[0],
       price: product.price,
       stock: product.stock,
-    }, quantity);
+    }, quantity, true); // forceQuantity: true
     router.push('/checkout');
   };
 

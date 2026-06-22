@@ -16,7 +16,7 @@ interface CartContextType {
   cartItems: CartItem[];
   cartCount: number;
   cartSubtotal: number;
-  addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
+  addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number, forceQuantity?: boolean) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -52,12 +52,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [cartItems, isLoaded]);
 
-  const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
+  const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1, forceQuantity: boolean = false) => {
     setCartItems((prev) => {
       const existing = prev.find((i) => i.product === item.product);
       if (existing) {
         // Enforce stock limit
-        const newQty = Math.min(existing.quantity + quantity, item.stock);
+        const newQty = forceQuantity
+          ? Math.min(quantity, item.stock)
+          : Math.min(existing.quantity + quantity, item.stock);
         return prev.map((i) =>
           i.product === item.product ? { ...i, quantity: newQty } : i
         );
