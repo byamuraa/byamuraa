@@ -564,3 +564,38 @@ export async function getSubscribers() {
   }
   return data || [];
 }
+
+export async function generateUniqueSlug(name: string, excludeId?: string): Promise<string> {
+  const baseSlug = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+
+  const supabase = await createClient();
+  let slug = baseSlug;
+  let counter = 1;
+  let exists = true;
+
+  while (exists) {
+    let query = supabase
+      .from('products')
+      .select('id')
+      .eq('slug', slug);
+
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (!data || error) {
+      exists = false;
+    } else {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+  }
+
+  return slug;
+}

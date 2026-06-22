@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getProductById, updateProduct, deleteProduct } from '@/lib/dataService';
+import { getProductById, updateProduct, deleteProduct, generateUniqueSlug } from '@/lib/dataService';
 
 // Helper to check authentication
 async function checkAuth() {
@@ -51,11 +51,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Auto-update slug if name changes
     if (body.name && body.name !== existingProduct.name) {
-      body.slug = body.name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
+      body.slug = await generateUniqueSlug(body.name, id);
     }
 
     // Explicit conversions for numbers

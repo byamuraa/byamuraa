@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getProducts, createProduct } from '@/lib/dataService';
+import { getProducts, createProduct, generateUniqueSlug } from '@/lib/dataService';
 
 // Helper to check authentication
 async function checkAuth() {
@@ -92,11 +92,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create unique slug
-    const generatedSlug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
+    const generatedSlug = await generateUniqueSlug(name);
 
     const payload = {
       name,
