@@ -119,7 +119,7 @@ const faqCategories: FaqCategory[] = [
       {
         question: 'How do I request an exchange for a defective item?',
         answer:
-          'Email us at hello@amuraa.com or use our Contact page with your order number and photos of the defect. Our team will review the case within 48 hours and guide you through the exchange process, including a prepaid return label if applicable.',
+          'Email us at byamuraa@gmail.com or use our Contact page with your order number and photos of the defect. Our team will review the case within 48 hours and guide you through the exchange process, including a prepaid return label if applicable.',
       },
       {
         question: 'Do you offer refunds?',

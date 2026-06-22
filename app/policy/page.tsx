@@ -31,7 +31,7 @@ const policies = [
     title: 'Exchange Policy',
     paragraphs: [
       'We offer exchanges exclusively for items that arrive with a verified manufacturing defect. Unfortunately, we cannot exchange items based on personal preference, as each bag is cut and stitched individually for your order.',
-      'To request an exchange, email hello@amuraa.com within 7 days of receiving your order. Please include your order number along with clear photographs of the defect. Our team will review your request and respond within 48 hours with next steps.',
+      'To request an exchange, email byamuraa@gmail.com within 7 days of receiving your order. Please include your order number along with clear photographs of the defect. Our team will review your request and respond within 48 hours with next steps.',
     ],
   },
   {
@@ -48,7 +48,7 @@ const policies = [
     icon: Clock,
     title: 'Cancellation Policy',
     paragraphs: [
-      'You may cancel your order within 24 hours of placing it for a full refund, no questions asked. Simply email us at hello@amuraa.com with your order number and we will process the cancellation promptly.',
+      'You may cancel your order within 24 hours of placing it for a full refund, no questions asked. Simply email us at byamuraa@gmail.com with your order number and we will process the cancellation promptly.',
       'After the 24-hour window, your custom fabric may already be cut and quilting may have begun. At that stage, cancellations are unfortunately not possible, as the materials have been committed exclusively to your order. This is a core part of our zero-waste, made-to-order model.',
     ],
   },
@@ -66,7 +66,7 @@ const policies = [
     icon: Mail,
     title: 'Contact for Issues',
     paragraphs: [
-      'For any questions, concerns, or policy-related requests, our studio team is here to help. Please reach out to us at hello@amuraa.com — we aim to respond to every inquiry within 24 hours on business days.',
+      'For any questions, concerns, or policy-related requests, our studio team is here to help. Please reach out to us at byamuraa@gmail.com — we aim to respond to every inquiry within 24 hours on business days.',
       'You can also visit our Contact page to submit a detailed inquiry through our form, or browse our FAQ section for quick answers to common questions about sizing, care instructions, and delivery timelines.',
     ],
   },
@@ -158,7 +158,7 @@ export default function PolicyPage() {
             { label: 'Refund Processing', value: '5–7 business days' },
             { label: 'Cancellation Window', value: 'Within 24 hours of order' },
             { label: 'Shipping Damage Report', value: 'Within 48 hours' },
-            { label: 'Contact Email', value: 'hello@amuraa.com' },
+            { label: 'Contact Email', value: 'byamuraa@gmail.com' },
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col gap-0.5">
               <span className="text-[10px] font-bold uppercase tracking-widest text-brand-terracotta">

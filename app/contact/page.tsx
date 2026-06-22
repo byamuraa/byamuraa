@@ -119,7 +119,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 text-brand-terracotta flex-shrink-0" />
                 <div>
                   <p className="font-bold text-brand-dark">Write to Us</p>
-                  <p className="mt-0.5">hello@amuraa.com</p>
+                  <p className="mt-0.5">byamuraa@gmail.com</p>
                   <p className="text-[10px] text-brand-dark/50">For bulk custom bridal party quilted pouches inquiry</p>
                 </div>
               </div>
@@ -128,9 +128,9 @@ export default function ContactPage() {
                 <MapPin className="w-5 h-5 text-brand-terracotta flex-shrink-0" />
                 <div>
                   <p className="font-bold text-brand-dark">Our Workshop</p>
-                  <p className="mt-0.5">123 Craft Lane, Studio C</p>
-                  <p>Jaipur, Rajasthan, 302001</p>
-                  <p>India</p>
+                  <p className="mt-0.5">12b/6 Gangai Street</p>
+                  <p>Anna Nagar, Kallakurichi</p>
+                  <p>606213</p>
                 </div>
               </div>
             </div>

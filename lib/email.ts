@@ -4,7 +4,7 @@ const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT || '2525');
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@amuraa.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'byamuraa@gmail.com';
 
 function createTransporter() {
   if (SMTP_USER && SMTP_USER !== 'mock_user') {
