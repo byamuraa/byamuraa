@@ -37,7 +37,6 @@ export default function ShopPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedFabric, setSelectedFabric] = useState('');
-  const [priceRange, setPriceRange] = useState<number>(100);
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
@@ -53,10 +52,7 @@ export default function ShopPage() {
         const res = await fetch(`/api/products?${queryParams.toString()}`, { cache: 'no-store' });
         const data = await res.json();
         if (data.products) {
-          // Client-side filter for price range limit
-          let filtered = data.products as Product[];
-          filtered = filtered.filter(p => p.price <= priceRange);
-          setProducts(filtered);
+          setProducts(data.products as Product[]);
         }
       } catch (err) {
         console.error('Failed to load products:', err);
@@ -65,13 +61,12 @@ export default function ShopPage() {
       }
     }
     loadProducts();
-  }, [selectedCategory, selectedFabric, search, sortBy, priceRange]);
+  }, [selectedCategory, selectedFabric, search, sortBy]);
 
   const handleResetFilters = () => {
     setSearch('');
     setSelectedCategory('');
     setSelectedFabric('');
-    setPriceRange(100);
     setSortBy('newest');
   };
 
@@ -177,26 +172,6 @@ export default function ShopPage() {
             </div>
           </div>
 
-          {/* Price Range Slider Filter */}
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-brand-dark/95">Max Price</h4>
-              <span className="text-xs font-bold text-brand-terracotta">${priceRange}</span>
-            </div>
-            <input
-              type="range"
-              min="20"
-              max="100"
-              step="5"
-              value={priceRange}
-              onChange={(e) => setPriceRange(Number(e.target.value))}
-              className="w-full h-1 bg-brand-pink rounded-lg appearance-none cursor-pointer accent-brand-terracotta"
-            />
-            <div className="flex justify-between text-[10px] text-brand-dark/65 font-semibold mt-1">
-              <span>$20</span>
-              <span>$100</span>
-            </div>
-          </div>
 
           {/* Fabric Print Filters */}
           <div>
